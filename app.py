@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify
+import os
 
 app = Flask(__name__)
 
@@ -13,17 +14,28 @@ def analyze():
     name = data['name']
     attendance = float(data['attendance'])
     study_hours = float(data['study_hours'])
-    internal = float(data['internal'])
-    external = float(data['external'])
     gender = data['gender']
     subjects = data['subjects']
 
-    total = internal + external
-    percentage = round((total / 200) * 100, 2)
+    # Calculate total and percentage out of 500
+    subject_marks_list = [float(v) for v in subjects.values()]
+    total = sum(subject_marks_list)
+    percentage = round((total / 500) * 100, 2)
+
+    # Grade
     grade = get_grade(percentage)
-    status = "PASS" if percentage >= 35 else "FAIL"
+
+    # Pass/Fail — every subject must be 35 or above
+    subject_pass = all(float(m) >= 35 for m in subjects.values())
+    if subject_pass:
+        status = "PASS ✅"
+    else:
+        status = "FAIL ❌"
+
+    # Risk prediction
     risk = predict_risk(attendance, study_hours, percentage)
 
+    # Weak subjects below 35
     subject_names = list(subjects.keys())
     subject_marks = [float(v) for v in subjects.values()]
     weak_subjects = [s for s, m in subjects.items() if float(m) < 35]
@@ -37,8 +49,6 @@ def analyze():
         'risk': risk,
         'attendance': attendance,
         'study_hours': study_hours,
-        'internal': internal,
-        'external': external,
         'subject_names': subject_names,
         'subject_marks': subject_marks,
         'weak_subjects': weak_subjects
@@ -62,6 +72,5 @@ def predict_risk(attendance, study_hours, percentage):
         return "LOW RISK 🟢"
 
 if __name__ == '__main__':
-    import os
-port = int(os.environ.get('PORT', 5000))
-app.run(debug=False, host='0.0.0.0', port=port)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)
