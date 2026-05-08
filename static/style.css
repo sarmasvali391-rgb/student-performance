@@ -182,3 +182,25 @@ textarea {
 textarea:focus {
   border-color: #1a73e8;
 }
+#printBtn {
+  background: #2e7d32;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-bottom: 20px;
+  width: auto;
+}
+
+#printBtn:hover {
+  background: #1b5e20;
+}
+
+@media print {
+  header { display: block; }
+  .form-box { display: none; }
+  #printBtn { display: none; }
+  .results-box { display: block; }
+}
