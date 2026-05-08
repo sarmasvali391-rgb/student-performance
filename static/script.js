@@ -45,7 +45,7 @@ async function analyzeStudent() {
 
   // Fill result cards
   document.getElementById('res_name').textContent = data.name;
-  document.getElementById('res_total').textContent = data.total + ' / 200';
+  document.getElementById('res_total').textContent = data.total + ' / 500';
   document.getElementById('res_pct').textContent = data.percentage + '%';
   document.getElementById('res_grade').textContent = data.grade;
   document.getElementById('res_status').textContent = data.status;
