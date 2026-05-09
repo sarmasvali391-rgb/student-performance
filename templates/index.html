@@ -4,111 +4,261 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Student Performance Analysis</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-  <header>
-    <h1>📊 Student Performance Analysis System</h1>
-    <p>Enter student details to get instant results</p>
-  </header>
+<header>
+  <h1>📊 Student Performance Analysis System</h1>
+  <p>Select your course to analyze performance</p>
+</header>
 
-  <div class="container">
+<!-- COURSE SELECTION -->
+<div class="container">
+  <div class="course-select">
+    <h2>Select Course</h2>
+    <div class="course-buttons">
+      <button class="course-btn active" onclick="showCourse('puc')">📚 PUC</button>
+      <button class="course-btn" onclick="showCourse('bca')">🎓 BCA</button>
+    </div>
+  </div>
+
+  <!-- PUC SECTION -->
+  <div id="puc-section">
     <div class="form-box">
-      <h2>Enter Student Details</h2>
-
+      <h2>PUC Student Details</h2>
       <div class="form-group">
         <label>Student Name</label>
-        <input type="text" id="name" placeholder="Enter full name">
+        <input type="text" id="puc_name" placeholder="Enter full name">
       </div>
       <div class="form-group">
         <label>Attendance (%)</label>
-        <input type="number" id="attendance" placeholder="e.g. 85">
+        <input type="number" id="puc_attendance" placeholder="e.g. 85">
       </div>
       <div class="form-group">
         <label>Daily Study Hours</label>
-        <input type="number" id="study_hours" placeholder="e.g. 3">
+        <input type="number" id="puc_study_hours" placeholder="e.g. 3">
       </div>
       <div class="form-group">
         <label>Gender</label>
-        <select id="gender">
+        <select id="puc_gender">
           <option value="male">Male</option>
           <option value="female">Female</option>
         </select>
       </div>
 
       <h3>📚 Subject Marks (out of 100)</h3>
-
       <div class="form-group">
         <label>Mathematics</label>
-        <input type="number" id="math" placeholder="e.g. 80">
+        <input type="number" id="puc_math" placeholder="e.g. 80">
       </div>
       <div class="form-group">
         <label>Science</label>
-        <input type="number" id="science" placeholder="e.g. 75">
+        <input type="number" id="puc_science" placeholder="e.g. 75">
       </div>
       <div class="form-group">
         <label>English</label>
-        <input type="number" id="english" placeholder="e.g. 70">
+        <input type="number" id="puc_english" placeholder="e.g. 70">
       </div>
       <div class="form-group">
         <label>Kannada</label>
-        <input type="number" id="kannada" placeholder="e.g. 65">
+        <input type="number" id="puc_kannada" placeholder="e.g. 65">
       </div>
       <div class="form-group">
         <label>Social Science</label>
-        <input type="number" id="social" placeholder="e.g. 60">
+        <input type="number" id="puc_social" placeholder="e.g. 60">
       </div>
-
-      <button onclick="analyzeStudent()">🔍 Analyze Performance</button>
+      <button onclick="analyzePUC()">🔍 Analyze PUC Performance</button>
     </div>
 
-    <div class="results-box" id="results" style="display:none">
-      <h2>📋 Results for <span id="res_name"></span></h2>
-      <button onclick="savePDF()" id="printBtn">📄 Save as PDF</button>
-
+    <!-- PUC RESULTS -->
+    <div class="results-box" id="puc_results" style="display:none">
+      <h2>📋 Results for <span id="puc_res_name"></span></h2>
+      <button onclick="savePUCPDF()" id="printBtn">📄 Save as PDF</button>
       <div class="cards">
         <div class="card">
           <p>Total Marks (out of 500)</p>
-          <h3 id="res_total"></h3>
+          <h3 id="puc_res_total"></h3>
         </div>
         <div class="card">
           <p>Percentage</p>
-          <h3 id="res_pct"></h3>
+          <h3 id="puc_res_pct"></h3>
         </div>
         <div class="card">
           <p>Grade</p>
-          <h3 id="res_grade"></h3>
+          <h3 id="puc_res_grade"></h3>
         </div>
         <div class="card">
           <p>Status</p>
-          <h3 id="res_status"></h3>
+          <h3 id="puc_res_status"></h3>
         </div>
         <div class="card">
           <p>Risk Level</p>
-          <h3 id="res_risk"></h3>
+          <h3 id="puc_res_risk"></h3>
         </div>
         <div class="card">
           <p>Weak Subjects</p>
-          <h3 id="res_weak"></h3>
+          <h3 id="puc_res_weak"></h3>
         </div>
       </div>
-
       <div class="charts">
         <div class="chart-box">
           <h3>Subject Marks</h3>
-          <canvas id="barChart"></canvas>
+          <canvas id="puc_barChart"></canvas>
         </div>
         <div class="chart-box">
           <h3>Subject Performance Radar</h3>
-          <canvas id="pieChart"></canvas>
+          <canvas id="puc_radarChart"></canvas>
         </div>
       </div>
     </div>
   </div>
 
-  <script src="/static/script.js"></script>
+  <!-- BCA SECTION -->
+  <div id="bca-section" style="display:none">
+    <div class="form-box">
+      <h2>BCA Student Details</h2>
+
+      <!-- BCA MODE SELECTION -->
+      <div class="mode-select">
+        <button class="mode-btn active" onclick="showBCAMode('single')">📖 Single Semester</button>
+        <button class="mode-btn" onclick="showBCAMode('all')">📚 All Semesters</button>
+      </div>
+
+      <!-- COMMON DETAILS -->
+      <div class="form-group">
+        <label>Student Name</label>
+        <input type="text" id="bca_name" placeholder="Enter full name">
+      </div>
+      <div class="form-group">
+        <label>Roll Number</label>
+        <input type="text" id="bca_roll" placeholder="Enter roll number">
+      </div>
+      <div class="form-group">
+        <label>College Name</label>
+        <input type="text" id="bca_college" placeholder="Enter college name">
+      </div>
+      <div class="form-group">
+        <label>Attendance (%)</label>
+        <input type="number" id="bca_attendance" placeholder="e.g. 85">
+      </div>
+      <div class="form-group">
+        <label>Daily Study Hours</label>
+        <input type="number" id="bca_study_hours" placeholder="e.g. 3">
+      </div>
+      <div class="form-group">
+        <label>Gender</label>
+        <select id="bca_gender">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+
+      <!-- SINGLE SEM -->
+      <div id="bca_single_mode">
+        <div class="form-group">
+          <label>Select Semester</label>
+          <select id="bca_semester">
+            <option value="Semester 1">Semester 1</option>
+            <option value="Semester 2">Semester 2</option>
+            <option value="Semester 3">Semester 3</option>
+            <option value="Semester 4">Semester 4</option>
+            <option value="Semester 5">Semester 5</option>
+            <option value="Semester 6">Semester 6</option>
+          </select>
+        </div>
+        <h3>📚 Subject Marks (out of 100)</h3>
+        <div id="bca_single_subjects"></div>
+        <button onclick="analyzeBCASingle()">🔍 Analyze Single Semester</button>
+      </div>
+
+      <!-- ALL SEMS -->
+      <div id="bca_all_mode" style="display:none">
+        <div id="bca_all_subjects"></div>
+        <button onclick="analyzeBCAAll()">🔍 Analyze All Semesters</button>
+      </div>
+    </div>
+
+    <!-- BCA SINGLE RESULTS -->
+    <div class="results-box" id="bca_single_results" style="display:none">
+      <h2>📋 Results for <span id="bca_res_name"></span></h2>
+      <button onclick="saveBCASinglePDF()" id="printBtn">📄 Save as PDF</button>
+      <div class="cards">
+        <div class="card">
+          <p>Total Marks (out of 500)</p>
+          <h3 id="bca_res_total"></h3>
+        </div>
+        <div class="card">
+          <p>Percentage</p>
+          <h3 id="bca_res_pct"></h3>
+        </div>
+        <div class="card">
+          <p>CGPA</p>
+          <h3 id="bca_res_cgpa"></h3>
+        </div>
+        <div class="card">
+          <p>Status</p>
+          <h3 id="bca_res_status"></h3>
+        </div>
+        <div class="card">
+          <p>Risk Level</p>
+          <h3 id="bca_res_risk"></h3>
+        </div>
+        <div class="card">
+          <p>Weak Subjects</p>
+          <h3 id="bca_res_weak"></h3>
+        </div>
+      </div>
+      <div class="charts">
+        <div class="chart-box">
+          <h3>Subject Marks</h3>
+          <canvas id="bca_barChart"></canvas>
+        </div>
+        <div class="chart-box">
+          <h3>Subject Performance Radar</h3>
+          <canvas id="bca_radarChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- BCA ALL RESULTS -->
+    <div class="results-box" id="bca_all_results" style="display:none">
+      <h2>📋 All Semesters Results for <span id="bca_all_res_name"></span></h2>
+      <button onclick="saveBCAAllPDF()" id="printBtn">📄 Save as PDF</button>
+      <div class="cards">
+        <div class="card">
+          <p>SGPA</p>
+          <h3 id="bca_all_sgpa"></h3>
+        </div>
+        <div class="card">
+          <p>Overall Percentage</p>
+          <h3 id="bca_all_pct"></h3>
+        </div>
+        <div class="card">
+          <p>Completed Semesters</p>
+          <h3 id="bca_all_sems"></h3>
+        </div>
+        <div class="card">
+          <p>Risk Level</p>
+          <h3 id="bca_all_risk"></h3>
+        </div>
+      </div>
+      <div id="bca_sem_cards"></div>
+      <div class="charts">
+        <div class="chart-box">
+          <h3>CGPA Per Semester</h3>
+          <canvas id="bca_all_barChart"></canvas>
+        </div>
+        <div class="chart-box">
+          <h3>Overall Performance</h3>
+          <canvas id="bca_all_radarChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/static/script.js"></script>
 </body>
 </html>
