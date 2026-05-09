@@ -21,6 +21,7 @@
     <div class="course-buttons">
       <button class="course-btn active" onclick="showCourse('puc')">📚 PUC</button>
       <button class="course-btn" onclick="showCourse('bca')">🎓 BCA</button>
+      <button class="course-btn" onclick="showCourse('mca')">🎓 MCA</button>
     </div>
   </div>
 
@@ -259,6 +260,145 @@
   </div>
 </div>
 
+<!-- MCA SECTION -->
+  <div id="mca-section" style="display:none">
+    <div class="form-box">
+      <h2>MCA Student Details</h2>
+
+      <div class="mode-select">
+        <button class="mode-btn active" onclick="showMCAMode('single')">📖 Single Semester</button>
+        <button class="mode-btn" onclick="showMCAMode('all')">📚 All Semesters</button>
+      </div>
+
+      <div class="form-group">
+        <label>Student Name</label>
+        <input type="text" id="mca_name" placeholder="Enter full name">
+      </div>
+      <div class="form-group">
+        <label>Roll Number</label>
+        <input type="text" id="mca_roll" placeholder="Enter roll number">
+      </div>
+      <div class="form-group">
+        <label>College Name</label>
+        <input type="text" id="mca_college" placeholder="Enter college name">
+      </div>
+      <div class="form-group">
+        <label>Attendance (%)</label>
+        <input type="number" id="mca_attendance" placeholder="e.g. 85">
+      </div>
+      <div class="form-group">
+        <label>Daily Study Hours</label>
+        <input type="number" id="mca_study_hours" placeholder="e.g. 3">
+      </div>
+      <div class="form-group">
+        <label>Gender</label>
+        <select id="mca_gender">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+
+      <!-- MCA SINGLE SEM -->
+      <div id="mca_single_mode">
+        <div class="form-group">
+          <label>Select Semester</label>
+          <select id="mca_semester">
+            <option value="Semester 1">Semester 1</option>
+            <option value="Semester 2">Semester 2</option>
+            <option value="Semester 3">Semester 3</option>
+            <option value="Semester 4">Semester 4</option>
+          </select>
+        </div>
+        <h3>📚 Subject Marks (out of 100)</h3>
+        <div id="mca_single_subjects"></div>
+        <button onclick="analyzeMCASingle()">🔍 Analyze Single Semester</button>
+      </div>
+
+      <!-- MCA ALL SEMS -->
+      <div id="mca_all_mode" style="display:none">
+        <div id="mca_all_subjects"></div>
+        <button onclick="analyzeMCAAll()">🔍 Analyze All Semesters</button>
+      </div>
+    </div>
+
+    <!-- MCA SINGLE RESULTS -->
+    <div class="results-box" id="mca_single_results" style="display:none">
+      <h2>📋 Results for <span id="mca_res_name"></span></h2>
+      <button onclick="saveMCASinglePDF()" id="printBtn">📄 Save as PDF</button>
+      <div class="cards">
+        <div class="card">
+          <p>Total Marks (out of 500)</p>
+          <h3 id="mca_res_total"></h3>
+        </div>
+        <div class="card">
+          <p>Percentage</p>
+          <h3 id="mca_res_pct"></h3>
+        </div>
+        <div class="card">
+          <p>CGPA</p>
+          <h3 id="mca_res_cgpa"></h3>
+        </div>
+        <div class="card">
+          <p>Status</p>
+          <h3 id="mca_res_status"></h3>
+        </div>
+        <div class="card">
+          <p>Risk Level</p>
+          <h3 id="mca_res_risk"></h3>
+        </div>
+        <div class="card">
+          <p>Weak Subjects</p>
+          <h3 id="mca_res_weak"></h3>
+        </div>
+      </div>
+      <div class="charts">
+        <div class="chart-box">
+          <h3>Subject Marks</h3>
+          <canvas id="mca_barChart"></canvas>
+        </div>
+        <div class="chart-box">
+          <h3>Subject Performance Radar</h3>
+          <canvas id="mca_radarChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- MCA ALL RESULTS -->
+    <div class="results-box" id="mca_all_results" style="display:none">
+      <h2>📋 All Semesters Results for <span id="mca_all_res_name"></span></h2>
+      <button onclick="saveMCAAllPDF()" id="printBtn">📄 Save as PDF</button>
+      <div class="cards">
+        <div class="card">
+          <p>SGPA</p>
+          <h3 id="mca_all_sgpa"></h3>
+        </div>
+        <div class="card">
+          <p>Overall Percentage</p>
+          <h3 id="mca_all_pct"></h3>
+        </div>
+        <div class="card">
+          <p>Completed Semesters</p>
+          <h3 id="mca_all_sems"></h3>
+        </div>
+        <div class="card">
+          <p>Risk Level</p>
+          <h3 id="mca_all_risk"></h3>
+        </div>
+      </div>
+      <div id="mca_sem_cards"></div>
+      <div class="charts">
+        <div class="chart-box">
+          <h3>CGPA Per Semester</h3>
+          <canvas id="mca_all_barChart"></canvas>
+        </div>
+        <div class="chart-box">
+          <h3>Overall Performance</h3>
+          <canvas id="mca_all_radarChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  
 <script src="/static/script.js"></script>
 </body>
 </html>

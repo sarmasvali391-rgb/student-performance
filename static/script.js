@@ -595,3 +595,389 @@ function getSemRows() {
   });
   return rows;
 }
+// ── MCA SUBJECTS ──
+const mcaSubjects = {
+  'Semester 1': ['Computer Organization', 'Discrete Mathematics', 'Programming in C++', 'Data Structures', 'Software Engineering'],
+  'Semester 2': ['Advanced Java', 'Database Management', 'Operating Systems', 'Computer Networks', 'Algorithm Design'],
+  'Semester 3': ['Artificial Intelligence', 'Machine Learning', 'Cloud Computing', 'Mobile Application Development', 'Cyber Security'],
+  'Semester 4': ['Big Data Analytics', 'Internet of Things', 'Project Work', 'Elective 1', 'Internship']
+};
+
+// ── MCA MODE SELECTION ──
+function showMCAMode(mode) {
+  document.getElementById('mca_single_mode').style.display = mode === 'single' ? 'block' : 'none';
+  document.getElementById('mca_all_mode').style.display = mode === 'all' ? 'block' : 'none';
+  document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// ── LOAD MCA SINGLE SUBJECTS ──
+function loadMCASingleSubjects() {
+  const sem = document.getElementById('mca_semester').value;
+  const subjects = mcaSubjects[sem];
+  let html = '';
+  subjects.forEach(sub => {
+    const id = sub.replace(/\s+/g, '_').toLowerCase();
+    html += `
+      <div class="form-group">
+        <label>${sub}</label>
+        <input type="number" id="mca_single_${id}" placeholder="e.g. 75">
+      </div>`;
+  });
+  document.getElementById('mca_single_subjects').innerHTML = html;
+}
+
+// ── LOAD MCA ALL SUBJECTS ──
+function loadMCAAllSubjects() {
+  let html = '';
+  Object.entries(mcaSubjects).forEach(([sem, subjects]) => {
+    html += `<h3>📖 ${sem}</h3>`;
+    subjects.forEach(sub => {
+      const id = sub.replace(/\s+/g, '_').toLowerCase();
+      html += `
+        <div class="form-group">
+          <label>${sub}</label>
+          <input type="number" id="mca_all_${sem.replace(/\s+/g, '_')}_${id}" placeholder="e.g. 75">
+        </div>`;
+    });
+  });
+  document.getElementById('mca_all_subjects').innerHTML = html;
+}
+
+// ── SHOW COURSE ──
+function showCourse(course) {
+  document.getElementById('puc-section').style.display = course === 'puc' ? 'block' : 'none';
+  document.getElementById('bca-section').style.display = course === 'bca' ? 'block' : 'none';
+  document.getElementById('mca-section').style.display = course === 'mca' ? 'block' : 'none';
+  document.querySelectorAll('.course-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+
+  if (course === 'bca') {
+    loadBCASingleSubjects();
+    loadBCAAllSubjects();
+  }
+  if (course === 'mca') {
+    loadMCASingleSubjects();
+    loadMCAAllSubjects();
+  }
+}
+
+// ── ANALYZE MCA SINGLE ──
+async function analyzeMCASingle() {
+  const name = document.getElementById('mca_name').value;
+  const roll = document.getElementById('mca_roll').value;
+  const college = document.getElementById('mca_college').value;
+  const attendance = document.getElementById('mca_attendance').value;
+  const study_hours = document.getElementById('mca_study_hours').value;
+  const semester = document.getElementById('mca_semester').value;
+
+  if (!name || !attendance || !study_hours) {
+    alert('Please fill all fields!');
+    return;
+  }
+
+  const subjects = {};
+  mcaSubjects[semester].forEach(sub => {
+    const id = sub.replace(/\s+/g, '_').toLowerCase();
+    subjects[sub] = document.getElementById('mca_single_' + id)?.value || 0;
+  });
+
+  const payload = {
+    name, roll, college, attendance, study_hours,
+    gender: document.getElementById('mca_gender').value,
+    semester, subjects
+  };
+
+  try {
+    const response = await fetch('/analyze_mca_single', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+
+    document.getElementById('mca_single_results').style.display = 'block';
+    document.getElementById('mca_res_name').textContent = data.name;
+    document.getElementById('mca_res_total').textContent = data.total + ' / 500';
+    document.getElementById('mca_res_pct').textContent = data.percentage + '%';
+    document.getElementById('mca_res_cgpa').textContent = data.cgpa;
+    document.getElementById('mca_res_status').textContent = data.status.includes('PASS') ? '✅ PASS' : '❌ FAIL';
+    document.getElementById('mca_res_risk').textContent = getRiskEmoji(data.risk);
+    document.getElementById('mca_res_weak').textContent = data.weak_subjects.length > 0 ? data.weak_subjects.join(', ') : 'None ✅';
+
+    document.getElementById('mca_single_results').scrollIntoView({ behavior: 'smooth' });
+
+    if (typeof mcaBarChart !== 'undefined' && mcaBarChart) mcaBarChart.destroy();
+    if (typeof mcaRadarChart !== 'undefined' && mcaRadarChart) mcaRadarChart.destroy();
+
+    window.mcaBarChart = new Chart(document.getElementById('mca_barChart'), {
+      type: 'bar',
+      data: {
+        labels: data.subject_names,
+        datasets: [{
+          label: 'Marks out of 100',
+          data: data.subject_marks,
+          backgroundColor: ['#1a73e8', '#34a853', '#fbbc04', '#ea4335', '#9c27b0'],
+          borderRadius: 6
+        }]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
+    });
+
+    window.mcaRadarChart = new Chart(document.getElementById('mca_radarChart'), {
+      type: 'radar',
+      data: {
+        labels: data.subject_names,
+        datasets: [{
+          label: 'Marks',
+          data: data.subject_marks,
+          backgroundColor: 'rgba(26,115,232,0.2)',
+          borderColor: '#1a73e8',
+          pointBackgroundColor: '#1a73e8',
+          borderWidth: 2
+        }]
+      },
+      options: { responsive: true, scales: { r: { beginAtZero: true, max: 100 } } }
+    });
+
+  } catch (error) {
+    alert('Error! Make sure python app.py is running!');
+  }
+}
+
+// ── ANALYZE MCA ALL ──
+async function analyzeMCAAll() {
+  const name = document.getElementById('mca_name').value;
+  const roll = document.getElementById('mca_roll').value;
+  const college = document.getElementById('mca_college').value;
+  const attendance = document.getElementById('mca_attendance').value;
+  const study_hours = document.getElementById('mca_study_hours').value;
+
+  if (!name || !attendance || !study_hours) {
+    alert('Please fill all fields!');
+    return;
+  }
+
+  const semesters = {};
+  Object.entries(mcaSubjects).forEach(([sem, subjects]) => {
+    semesters[sem] = {};
+    subjects.forEach(sub => {
+      const id = sub.replace(/\s+/g, '_').toLowerCase();
+      semesters[sem][sub] = document.getElementById('mca_all_' + sem.replace(/\s+/g, '_') + '_' + id)?.value || 0;
+    });
+  });
+
+  const payload = {
+    name, roll, college, attendance, study_hours,
+    gender: document.getElementById('mca_gender').value,
+    semesters
+  };
+
+  try {
+    const response = await fetch('/analyze_mca_all', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+
+    document.getElementById('mca_all_results').style.display = 'block';
+    document.getElementById('mca_all_res_name').textContent = data.name;
+    document.getElementById('mca_all_sgpa').textContent = data.sgpa;
+    document.getElementById('mca_all_pct').textContent = data.overall_percentage + '%';
+    document.getElementById('mca_all_sems').textContent = data.completed_sems + ' / 4';
+    document.getElementById('mca_all_risk').textContent = getRiskEmoji(data.risk);
+
+    let semHtml = '<div class="sem-cards">';
+    data.sem_results.forEach(sem => {
+      semHtml += `
+        <div class="sem-card">
+          <h3>${sem.semester}</h3>
+          <p>Total: ${sem.total} / 500</p>
+          <p>Percentage: ${sem.percentage}%</p>
+          <p>CGPA: ${sem.cgpa}</p>
+          <p>Status: ${sem.status.includes('PASS') ? '✅ PASS' : '❌ FAIL'}</p>
+          ${sem.weak_subjects.length > 0 ? '<p>Weak: ' + sem.weak_subjects.join(', ') + '</p>' : '<p>No weak subjects ✅</p>'}
+        </div>`;
+    });
+    semHtml += '</div>';
+    document.getElementById('mca_sem_cards').innerHTML = semHtml;
+
+    document.getElementById('mca_all_results').scrollIntoView({ behavior: 'smooth' });
+
+    if (typeof mcaAllBarChart !== 'undefined' && mcaAllBarChart) mcaAllBarChart.destroy();
+    if (typeof mcaAllRadarChart !== 'undefined' && mcaAllRadarChart) mcaAllRadarChart.destroy();
+
+    window.mcaAllBarChart = new Chart(document.getElementById('mca_all_barChart'), {
+      type: 'bar',
+      data: {
+        labels: data.sem_results.map(s => s.semester),
+        datasets: [{
+          label: 'CGPA',
+          data: data.sem_results.map(s => s.cgpa),
+          backgroundColor: ['#1a73e8', '#34a853', '#fbbc04', '#ea4335'],
+          borderRadius: 6
+        }]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true, max: 10 } } }
+    });
+
+    window.mcaAllRadarChart = new Chart(document.getElementById('mca_all_radarChart'), {
+      type: 'radar',
+      data: {
+        labels: data.sem_results.map(s => s.semester),
+        datasets: [{
+          label: 'Percentage',
+          data: data.sem_results.map(s => s.percentage),
+          backgroundColor: 'rgba(26,115,232,0.2)',
+          borderColor: '#1a73e8',
+          pointBackgroundColor: '#1a73e8',
+          borderWidth: 2
+        }]
+      },
+      options: { responsive: true, scales: { r: { beginAtZero: true, max: 100 } } }
+    });
+
+  } catch (error) {
+    alert('Error! Make sure python app.py is running!');
+  }
+}
+
+// ── MCA SINGLE PDF ──
+function saveMCASinglePDF() {
+  const name = document.getElementById('mca_res_name').textContent;
+  const status = document.getElementById('mca_res_status').textContent;
+  const risk = document.getElementById('mca_res_risk').textContent;
+  const semester = document.getElementById('mca_semester').value;
+  const subjects = mcaSubjects[semester];
+
+  let subjectRows = '';
+  subjects.forEach(sub => {
+    const id = sub.replace(/\s+/g, '_').toLowerCase();
+    const marks = document.getElementById('mca_single_' + id)?.value || 0;
+    subjectRows += `<tr>
+      <td>${sub}</td>
+      <td>${marks}</td>
+      <td class="${marks >= 35 ? 'pass' : 'fail'}">${marks >= 35 ? '✅ PASS' : '❌ FAIL'}</td>
+    </tr>`;
+  });
+
+  const printContents = `
+    <html>
+    <head>
+      <title>MCA Report - ${name}</title>
+      <meta charset="UTF-8">
+      <style>
+        body { font-family: Arial, sans-serif; padding: 30px; color: #333; }
+        .header { background: #000; color: white; padding: 20px; text-align: center; margin-bottom: 30px; border-radius: 10px; }
+        h1 { margin: 0; font-size: 1.5rem; }
+        h2 { color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 8px; margin-top: 30px; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        td, th { border: 1px solid #ddd; padding: 12px 16px; text-align: left; }
+        th { background: #1a73e8; color: white; }
+        tr:nth-child(even) { background: #f5f5f5; }
+        .pass { color: green; font-weight: bold; }
+        .fail { color: red; font-weight: bold; }
+        .footer { text-align: center; color: #999; font-size: 0.8rem; margin-top: 30px; }
+      </style>
+    </head>
+    <body>
+      <div class="header"><h1>🎓 MCA Performance Report - ${semester}</h1></div>
+      <h2>Student Details</h2>
+      <table>
+        <tr><th>Field</th><th>Details</th></tr>
+        <tr><td>Student Name</td><td>${name}</td></tr>
+        <tr><td>Roll Number</td><td>${document.getElementById('mca_roll').value}</td></tr>
+        <tr><td>College</td><td>${document.getElementById('mca_college').value}</td></tr>
+        <tr><td>Semester</td><td>${semester}</td></tr>
+        <tr><td>Total Marks</td><td>${document.getElementById('mca_res_total').textContent}</td></tr>
+        <tr><td>Percentage</td><td>${document.getElementById('mca_res_pct').textContent}</td></tr>
+        <tr><td>CGPA</td><td>${document.getElementById('mca_res_cgpa').textContent}</td></tr>
+        <tr><td>Status</td><td class="${status.includes('PASS') ? 'pass' : 'fail'}">${status}</td></tr>
+        <tr><td>Risk Level</td><td>${risk}</td></tr>
+        <tr><td>Weak Subjects</td><td>${document.getElementById('mca_res_weak').textContent}</td></tr>
+      </table>
+      <h2>Subject Marks</h2>
+      <table>
+        <tr><th>Subject</th><th>Marks (out of 100)</th><th>Status</th></tr>
+        ${subjectRows}
+      </table>
+      <div class="footer"><p>Generated by Student Performance Analysis System | ${new Date().toLocaleDateString()}</p></div>
+    </body></html>`;
+
+  const w = window.open('', '_blank');
+  w.document.write(printContents);
+  w.document.close();
+  setTimeout(() => { w.print(); }, 500);
+}
+
+// ── MCA ALL PDF ──
+function saveMCAAllPDF() {
+  const name = document.getElementById('mca_all_res_name').textContent;
+
+  const printContents = `
+    <html>
+    <head>
+      <title>MCA All Sems Report - ${name}</title>
+      <meta charset="UTF-8">
+      <style>
+        body { font-family: Arial, sans-serif; padding: 30px; color: #333; }
+        .header { background: #000; color: white; padding: 20px; text-align: center; margin-bottom: 30px; border-radius: 10px; }
+        h1 { margin: 0; font-size: 1.5rem; }
+        h2 { color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 8px; margin-top: 30px; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        td, th { border: 1px solid #ddd; padding: 12px 16px; text-align: left; }
+        th { background: #1a73e8; color: white; }
+        tr:nth-child(even) { background: #f5f5f5; }
+        .pass { color: green; font-weight: bold; }
+        .fail { color: red; font-weight: bold; }
+        .footer { text-align: center; color: #999; font-size: 0.8rem; margin-top: 30px; }
+      </style>
+    </head>
+    <body>
+      <div class="header"><h1>🎓 MCA All Semesters Report</h1></div>
+      <h2>Student Details</h2>
+      <table>
+        <tr><th>Field</th><th>Details</th></tr>
+        <tr><td>Student Name</td><td>${name}</td></tr>
+        <tr><td>Roll Number</td><td>${document.getElementById('mca_roll').value}</td></tr>
+        <tr><td>College</td><td>${document.getElementById('mca_college').value}</td></tr>
+        <tr><td>SGPA</td><td>${document.getElementById('mca_all_sgpa').textContent}</td></tr>
+        <tr><td>Overall Percentage</td><td>${document.getElementById('mca_all_pct').textContent}</td></tr>
+        <tr><td>Completed Semesters</td><td>${document.getElementById('mca_all_sems').textContent}</td></tr>
+        <tr><td>Risk Level</td><td>${document.getElementById('mca_all_risk').textContent}</td></tr>
+      </table>
+      <h2>Semester wise Results</h2>
+      <table>
+        <tr><th>Semester</th><th>Total</th><th>Percentage</th><th>CGPA</th><th>Status</th></tr>
+        ${getMCASemRows()}
+      </table>
+      <div class="footer"><p>Generated by Student Performance Analysis System | ${new Date().toLocaleDateString()}</p></div>
+    </body></html>`;
+
+  const w = window.open('', '_blank');
+  w.document.write(printContents);
+  w.document.close();
+  setTimeout(() => { w.print(); }, 500);
+}
+
+function getMCASemRows() {
+  const cards = document.querySelectorAll('#mca_sem_cards .sem-card');
+  let rows = '';
+  cards.forEach(card => {
+    const lines = card.querySelectorAll('p');
+    const h3 = card.querySelector('h3').textContent;
+    const total = lines[0].textContent.replace('Total: ', '');
+    const pct = lines[1].textContent.replace('Percentage: ', '');
+    const cgpa = lines[2].textContent.replace('CGPA: ', '');
+    const status = lines[3].textContent.replace('Status: ', '');
+    rows += `<tr>
+      <td>${h3}</td>
+      <td>${total}</td>
+      <td>${pct}</td>
+      <td>${cgpa}</td>
+      <td class="${status.includes('PASS') ? 'pass' : 'fail'}">${status}</td>
+    </tr>`;
+  });
+  return rows;
+}
