@@ -1,17 +1,15 @@
 let barChart = null;
-let pieChart = null;
+let radarChart = null;
 
 async function analyzeStudent() {
 
   const name = document.getElementById('name').value;
   const attendance = document.getElementById('attendance').value;
   const study_hours = document.getElementById('study_hours').value;
-  const internal = document.getElementById('internal').value;
-  const external = document.getElementById('external').value;
   const gender = document.getElementById('gender').value;
 
   // Check all fields are filled
-  if (!name || !attendance || !study_hours || !internal || !external) {
+  if (!name || !attendance || !study_hours) {
     alert('Please fill all fields!');
     return;
   }
@@ -20,8 +18,6 @@ async function analyzeStudent() {
     name: name,
     attendance: attendance,
     study_hours: study_hours,
-    internal: internal,
-    external: external,
     gender: gender,
     subjects: {
       Mathematics: document.getElementById('math').value || 0,
@@ -58,7 +54,7 @@ async function analyzeStudent() {
 
   // Destroy old charts if exist
   if (barChart) barChart.destroy();
-  if (pieChart) pieChart.destroy();
+  if (radarChart) radarChart.destroy();
 
   // Bar Chart - Subject Marks
   barChart = new Chart(document.getElementById('barChart'), {
@@ -66,7 +62,7 @@ async function analyzeStudent() {
     data: {
       labels: data.subject_names,
       datasets: [{
-        label: 'Marks',
+        label: 'Marks out of 100',
         data: data.subject_marks,
         backgroundColor: [
           '#1a73e8',
@@ -89,18 +85,28 @@ async function analyzeStudent() {
     }
   });
 
-  // Pie Chart - Internal vs External
-  pieChart = new Chart(document.getElementById('pieChart'), {
-    type: 'pie',
+  // Radar Chart - Subject Performance
+  radarChart = new Chart(document.getElementById('pieChart'), {
+    type: 'radar',
     data: {
-      labels: ['Internal Marks', 'External Marks'],
+      labels: data.subject_names,
       datasets: [{
-        data: [data.internal, data.external],
-        backgroundColor: ['#1a73e8', '#34a853']
+        label: 'Marks',
+        data: data.subject_marks,
+        backgroundColor: 'rgba(26, 115, 232, 0.2)',
+        borderColor: '#1a73e8',
+        pointBackgroundColor: '#1a73e8',
+        borderWidth: 2
       }]
     },
     options: {
-      responsive: true
+      responsive: true,
+      scales: {
+        r: {
+          beginAtZero: true,
+          max: 100
+        }
+      }
     }
   });
 }
