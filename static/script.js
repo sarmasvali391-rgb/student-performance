@@ -111,61 +111,80 @@ async function analyzeStudent() {
   });
 }
 function savePDF() {
-  const results = document.getElementById('results');
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
   const name = document.getElementById('res_name').textContent;
-  
-  // Open print dialog
-  const printContents = `
-    <html>
-    <head>
-      <title>Student Report - ${name}</title>
-      <style>
-        body { font-family: Arial, sans-serif; padding: 30px; }
-        h1 { color: #1a73e8; text-align: center; }
-        h2 { color: #333; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        td, th { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background: #1a73e8; color: white; }
-        tr:nth-child(even) { background: #f5f5f5; }
-        .pass { color: green; font-weight: bold; font-size: 1.2rem; }
-        .fail { color: red; font-weight: bold; font-size: 1.2rem; }
-        .header { background: #000; color: white; padding: 20px; text-align: center; margin-bottom: 30px; }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>📊 Student Performance Report</h1>
-      </div>
+  const total = document.getElementById('res_total').textContent;
+  const percentage = document.getElementById('res_pct').textContent;
+  const grade = document.getElementById('res_grade').textContent;
+  const status = document.getElementById('res_status').textContent;
+  const risk = document.getElementById('res_risk').textContent;
+  const weak = document.getElementById('res_weak').textContent;
 
-      <h2>Student Details</h2>
-      <table>
-        <tr><th>Field</th><th>Details</th></tr>
-        <tr><td>Student Name</td><td>${document.getElementById('res_name').textContent}</td></tr>
-        <tr><td>Total Marks</td><td>${document.getElementById('res_total').textContent}</td></tr>
-        <tr><td>Percentage</td><td>${document.getElementById('res_pct').textContent}</td></tr>
-        <tr><td>Grade</td><td>${document.getElementById('res_grade').textContent}</td></tr>
-        <tr><td>Status</td><td class="${document.getElementById('res_status').textContent.includes('PASS') ? 'pass' : 'fail'}">${document.getElementById('res_status').textContent}</td></tr>
-        <tr><td>Risk Level</td><td>${document.getElementById('res_risk').textContent}</td></tr>
-        <tr><td>Weak Subjects</td><td>${document.getElementById('res_weak').textContent}</td></tr>
-      </table>
+  // Header
+  doc.setFillColor(0, 0, 0);
+  doc.rect(0, 0, 210, 30, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Student Performance Report', 105, 18, { align: 'center' });
 
-      <h2>Subject Marks</h2>
-      <table>
-        <tr><th>Subject</th><th>Marks (out of 100)</th><th>Status</th></tr>
-        ${getSubjectRows()}
-      </table>
+  // Student Details
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Student Details', 14, 45);
 
-    </body>
-    </html>
-  `;
+  doc.setDrawColor(26, 115, 232);
+  doc.setLineWidth(0.5);
+  doc.line(14, 47, 196, 47);
 
-  const printWindow = window.open('', '_blank');
-  printWindow.document.write(printContents);
-  printWindow.document.close();
-  printWindow.print();
-}
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
 
-function getSubjectRows() {
+  const details = [
+    ['Student Name', name],
+    ['Total Marks', total],
+    ['Percentage', percentage],
+    ['Grade', grade],
+    ['Status', status],
+    ['Risk Level', risk],
+    ['Weak Subjects', weak]
+  ];
+
+  let y = 55;
+  details.forEach(([label, value]) => {
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(100, 100, 100);
+    doc.text(label + ':', 14, y);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(0, 0, 0);
+    doc.text(value, 80, y);
+    y += 10;
+  });
+
+  // Subject Marks Table
+  y += 5;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.setTextColor(0, 0, 0);
+  doc.text('Subject Marks', 14, y);
+  y += 5;
+  doc.setDrawColor(26, 115, 232);
+  doc.line(14, y, 196, y);
+  y += 8;
+
+  // Table header
+  doc.setFillColor(26, 115, 232);
+  doc.rect(14, y - 5, 182, 10, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(11);
+  doc.text('Subject', 20, y);
+  doc.text('Marks', 100, y);
+  doc.text('Status', 150, y);
+  y += 8;
+
   const subjects = {
     'Mathematics': document.getElementById('math').value,
     'Science': document.getElementById('science').value,
@@ -174,15 +193,33 @@ function getSubjectRows() {
     'Social Science': document.getElementById('social').value
   };
 
-  let rows = '';
+  let isEven = false;
   for (const [subject, marks] of Object.entries(subjects)) {
-    const status = marks >= 35 ? '✅ Pass' : '❌ Fail';
-    const color = marks >= 35 ? 'green' : 'red';
-    rows += `<tr>
-      <td>${subject}</td>
-      <td>${marks}</td>
-      <td style="color:${color}; font-weight:bold">${status}</td>
-    </tr>`;
+    if (isEven) {
+      doc.setFillColor(240, 245, 255);
+      doc.rect(14, y - 5, 182, 10, 'F');
+    }
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'normal');
+    doc.text(subject, 20, y);
+    doc.text(marks.toString(), 100, y);
+
+    if (parseInt(marks) >= 35) {
+      doc.setTextColor(0, 150, 0);
+      doc.text('PASS', 150, y);
+    } else {
+      doc.setTextColor(200, 0, 0);
+      doc.text('FAIL', 150, y);
+    }
+    y += 10;
+    isEven = !isEven;
   }
-  return rows;
+
+  // Footer
+  doc.setTextColor(150, 150, 150);
+  doc.setFontSize(9);
+  doc.text('Generated by Student Performance Analysis System', 105, 285, { align: 'center' });
+
+  // Save directly!
+  doc.save('Student_Report_' + name + '.pdf');
 }
