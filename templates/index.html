@@ -19,10 +19,26 @@
   <div class="course-select">
     <h2>Select Course</h2>
     <div class="course-buttons">
-      <button class="course-btn active" onclick="showCourse('puc')">📚 PUC</button>
-      <button class="course-btn" onclick="showCourse('bca')">🎓 BCA</button>
-      <button class="course-btn" onclick="showCourse('mca')">🎓 MCA</button>
-    </div>
+  <!-- School -->
+  <div class="course-group">
+    <p class="group-label">School</p>
+    <button class="course-btn active" onclick="showCourse('puc')">📚 PUC</button>
+  </div>
+
+  <!-- Degree -->
+  <div class="course-group">
+    <p class="group-label">Degree</p>
+    <button class="course-btn" onclick="showCourse('bca')">🎓 BCA</button>
+    <button class="course-btn" onclick="showCourse('bba')">🎓 BBA</button>
+    <button class="course-btn" onclick="showCourse('bcom')">🎓 BCom</button>
+  </div>
+
+  <!-- PG -->
+  <div class="course-group">
+    <p class="group-label">Post Graduate</p>
+    <button class="course-btn" onclick="showCourse('mca')">🎓 MCA</button>
+    <button class="course-btn" onclick="showCourse('mba')">🎓 MBA</button>
+  </div>
   </div>
 
   <!-- PUC SECTION -->
@@ -398,7 +414,270 @@
       </div>
     </div>
   </div>
-  
+  <!-- BBA SECTION -->
+  <div id="bba-section" style="display:none">
+    <div class="form-box">
+      <h2>BBA Student Details</h2>
+      <div class="mode-select">
+        <button class="mode-btn active" onclick="showBBAMode('single')">📖 Single Semester</button>
+        <button class="mode-btn" onclick="showBBAMode('all')">📚 All Semesters</button>
+      </div>
+      <div class="form-group">
+        <label>Student Name</label>
+        <input type="text" id="bba_name" placeholder="Enter full name">
+      </div>
+      <div class="form-group">
+        <label>Roll Number</label>
+        <input type="text" id="bba_roll" placeholder="Enter roll number">
+      </div>
+      <div class="form-group">
+        <label>College Name</label>
+        <input type="text" id="bba_college" placeholder="Enter college name">
+      </div>
+      <div class="form-group">
+        <label>Attendance (%)</label>
+        <input type="number" id="bba_attendance" placeholder="e.g. 85">
+      </div>
+      <div class="form-group">
+        <label>Daily Study Hours</label>
+        <input type="number" id="bba_study_hours" placeholder="e.g. 3">
+      </div>
+      <div class="form-group">
+        <label>Gender</label>
+        <select id="bba_gender">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+      <div id="bba_single_mode">
+        <div class="form-group">
+          <label>Select Semester</label>
+          <select id="bba_semester">
+            <option value="Semester 1">Semester 1</option>
+            <option value="Semester 2">Semester 2</option>
+            <option value="Semester 3">Semester 3</option>
+            <option value="Semester 4">Semester 4</option>
+            <option value="Semester 5">Semester 5</option>
+            <option value="Semester 6">Semester 6</option>
+          </select>
+        </div>
+        <h3>📚 Subject Marks (out of 100)</h3>
+        <div id="bba_single_subjects"></div>
+        <button onclick="analyzeBBASingle()">🔍 Analyze Single Semester</button>
+      </div>
+      <div id="bba_all_mode" style="display:none">
+        <div id="bba_all_subjects"></div>
+        <button onclick="analyzeBBAAll()">🔍 Analyze All Semesters</button>
+      </div>
+    </div>
+    <div class="results-box" id="bba_single_results" style="display:none">
+      <h2>📋 Results for <span id="bba_res_name"></span></h2>
+      <button onclick="saveBBASinglePDF()" id="printBtn">📄 Save as PDF</button>
+      <div class="cards">
+        <div class="card"><p>Total Marks (out of 500)</p><h3 id="bba_res_total"></h3></div>
+        <div class="card"><p>Percentage</p><h3 id="bba_res_pct"></h3></div>
+        <div class="card"><p>CGPA</p><h3 id="bba_res_cgpa"></h3></div>
+        <div class="card"><p>Status</p><h3 id="bba_res_status"></h3></div>
+        <div class="card"><p>Risk Level</p><h3 id="bba_res_risk"></h3></div>
+        <div class="card"><p>Weak Subjects</p><h3 id="bba_res_weak"></h3></div>
+      </div>
+      <div class="charts">
+        <div class="chart-box"><h3>Subject Marks</h3><canvas id="bba_barChart"></canvas></div>
+        <div class="chart-box"><h3>Subject Performance Radar</h3><canvas id="bba_radarChart"></canvas></div>
+      </div>
+    </div>
+    <div class="results-box" id="bba_all_results" style="display:none">
+      <h2>📋 All Semesters Results for <span id="bba_all_res_name"></span></h2>
+      <button onclick="saveBBAAllPDF()" id="printBtn">📄 Save as PDF</button>
+      <div class="cards">
+        <div class="card"><p>SGPA</p><h3 id="bba_all_sgpa"></h3></div>
+        <div class="card"><p>Overall Percentage</p><h3 id="bba_all_pct"></h3></div>
+        <div class="card"><p>Completed Semesters</p><h3 id="bba_all_sems"></h3></div>
+        <div class="card"><p>Risk Level</p><h3 id="bba_all_risk"></h3></div>
+      </div>
+      <div id="bba_sem_cards"></div>
+      <div class="charts">
+        <div class="chart-box"><h3>CGPA Per Semester</h3><canvas id="bba_all_barChart"></canvas></div>
+        <div class="chart-box"><h3>Overall Performance</h3><canvas id="bba_all_radarChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BCOM SECTION -->
+  <div id="bcom-section" style="display:none">
+    <div class="form-box">
+      <h2>BCom Student Details</h2>
+      <div class="mode-select">
+        <button class="mode-btn active" onclick="showBComMode('single')">📖 Single Semester</button>
+        <button class="mode-btn" onclick="showBComMode('all')">📚 All Semesters</button>
+      </div>
+      <div class="form-group">
+        <label>Student Name</label>
+        <input type="text" id="bcom_name" placeholder="Enter full name">
+      </div>
+      <div class="form-group">
+        <label>Roll Number</label>
+        <input type="text" id="bcom_roll" placeholder="Enter roll number">
+      </div>
+      <div class="form-group">
+        <label>College Name</label>
+        <input type="text" id="bcom_college" placeholder="Enter college name">
+      </div>
+      <div class="form-group">
+        <label>Attendance (%)</label>
+        <input type="number" id="bcom_attendance" placeholder="e.g. 85">
+      </div>
+      <div class="form-group">
+        <label>Daily Study Hours</label>
+        <input type="number" id="bcom_study_hours" placeholder="e.g. 3">
+      </div>
+      <div class="form-group">
+        <label>Gender</label>
+        <select id="bcom_gender">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+      <div id="bcom_single_mode">
+        <div class="form-group">
+          <label>Select Semester</label>
+          <select id="bcom_semester">
+            <option value="Semester 1">Semester 1</option>
+            <option value="Semester 2">Semester 2</option>
+            <option value="Semester 3">Semester 3</option>
+            <option value="Semester 4">Semester 4</option>
+            <option value="Semester 5">Semester 5</option>
+            <option value="Semester 6">Semester 6</option>
+          </select>
+        </div>
+        <h3>📚 Subject Marks (out of 100)</h3>
+        <div id="bcom_single_subjects"></div>
+        <button onclick="analyzeBComSingle()">🔍 Analyze Single Semester</button>
+      </div>
+      <div id="bcom_all_mode" style="display:none">
+        <div id="bcom_all_subjects"></div>
+        <button onclick="analyzeBComAll()">🔍 Analyze All Semesters</button>
+      </div>
+    </div>
+    <div class="results-box" id="bcom_single_results" style="display:none">
+      <h2>📋 Results for <span id="bcom_res_name"></span></h2>
+      <button onclick="saveBComSinglePDF()" id="printBtn">📄 Save as PDF</button>
+      <div class="cards">
+        <div class="card"><p>Total Marks (out of 500)</p><h3 id="bcom_res_total"></h3></div>
+        <div class="card"><p>Percentage</p><h3 id="bcom_res_pct"></h3></div>
+        <div class="card"><p>CGPA</p><h3 id="bcom_res_cgpa"></h3></div>
+        <div class="card"><p>Status</p><h3 id="bcom_res_status"></h3></div>
+        <div class="card"><p>Risk Level</p><h3 id="bcom_res_risk"></h3></div>
+        <div class="card"><p>Weak Subjects</p><h3 id="bcom_res_weak"></h3></div>
+      </div>
+      <div class="charts">
+        <div class="chart-box"><h3>Subject Marks</h3><canvas id="bcom_barChart"></canvas></div>
+        <div class="chart-box"><h3>Subject Performance Radar</h3><canvas id="bcom_radarChart"></canvas></div>
+      </div>
+    </div>
+    <div class="results-box" id="bcom_all_results" style="display:none">
+      <h2>📋 All Semesters Results for <span id="bcom_all_res_name"></span></h2>
+      <button onclick="saveBComAllPDF()" id="printBtn">📄 Save as PDF</button>
+      <div class="cards">
+        <div class="card"><p>SGPA</p><h3 id="bcom_all_sgpa"></h3></div>
+        <div class="card"><p>Overall Percentage</p><h3 id="bcom_all_pct"></h3></div>
+        <div class="card"><p>Completed Semesters</p><h3 id="bcom_all_sems"></h3></div>
+        <div class="card"><p>Risk Level</p><h3 id="bcom_all_risk"></h3></div>
+      </div>
+      <div id="bcom_sem_cards"></div>
+      <div class="charts">
+        <div class="chart-box"><h3>CGPA Per Semester</h3><canvas id="bcom_all_barChart"></canvas></div>
+        <div class="chart-box"><h3>Overall Performance</h3><canvas id="bcom_all_radarChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MBA SECTION -->
+  <div id="mba-section" style="display:none">
+    <div class="form-box">
+      <h2>MBA Student Details</h2>
+      <div class="mode-select">
+        <button class="mode-btn active" onclick="showMBAMode('single')">📖 Single Semester</button>
+        <button class="mode-btn" onclick="showMBAMode('all')">📚 All Semesters</button>
+      </div>
+      <div class="form-group">
+        <label>Student Name</label>
+        <input type="text" id="mba_name" placeholder="Enter full name">
+      </div>
+      <div class="form-group">
+        <label>Roll Number</label>
+        <input type="text" id="mba_roll" placeholder="Enter roll number">
+      </div>
+      <div class="form-group">
+        <label>College Name</label>
+        <input type="text" id="mba_college" placeholder="Enter college name">
+      </div>
+      <div class="form-group">
+        <label>Attendance (%)</label>
+        <input type="number" id="mba_attendance" placeholder="e.g. 85">
+      </div>
+      <div class="form-group">
+        <label>Daily Study Hours</label>
+        <input type="number" id="mba_study_hours" placeholder="e.g. 3">
+      </div>
+      <div class="form-group">
+        <label>Gender</label>
+        <select id="mba_gender">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+      <div id="mba_single_mode">
+        <div class="form-group">
+          <label>Select Semester</label>
+          <select id="mba_semester">
+            <option value="Semester 1">Semester 1</option>
+            <option value="Semester 2">Semester 2</option>
+            <option value="Semester 3">Semester 3</option>
+            <option value="Semester 4">Semester 4</option>
+          </select>
+        </div>
+        <h3>📚 Subject Marks (out of 100)</h3>
+        <div id="mba_single_subjects"></div>
+        <button onclick="analyzeMBASingle()">🔍 Analyze Single Semester</button>
+      </div>
+      <div id="mba_all_mode" style="display:none">
+        <div id="mba_all_subjects"></div>
+        <button onclick="analyzeMBAAll()">🔍 Analyze All Semesters</button>
+      </div>
+    </div>
+    <div class="results-box" id="mba_single_results" style="display:none">
+      <h2>📋 Results for <span id="mba_res_name"></span></h2>
+      <button onclick="saveMBASinglePDF()" id="printBtn">📄 Save as PDF</button>
+      <div class="cards">
+        <div class="card"><p>Total Marks (out of 500)</p><h3 id="mba_res_total"></h3></div>
+        <div class="card"><p>Percentage</p><h3 id="mba_res_pct"></h3></div>
+        <div class="card"><p>CGPA</p><h3 id="mba_res_cgpa"></h3></div>
+        <div class="card"><p>Status</p><h3 id="mba_res_status"></h3></div>
+        <div class="card"><p>Risk Level</p><h3 id="mba_res_risk"></h3></div>
+        <div class="card"><p>Weak Subjects</p><h3 id="mba_res_weak"></h3></div>
+      </div>
+      <div class="charts">
+        <div class="chart-box"><h3>Subject Marks</h3><canvas id="mba_barChart"></canvas></div>
+        <div class="chart-box"><h3>Subject Performance Radar</h3><canvas id="mba_radarChart"></canvas></div>
+      </div>
+    </div>
+    <div class="results-box" id="mba_all_results" style="display:none">
+      <h2>📋 All Semesters Results for <span id="mba_all_res_name"></span></h2>
+      <button onclick="saveMBAAllPDF()" id="printBtn">📄 Save as PDF</button>
+      <div class="cards">
+        <div class="card"><p>SGPA</p><h3 id="mba_all_sgpa"></h3></div>
+        <div class="card"><p>Overall Percentage</p><h3 id="mba_all_pct"></h3></div>
+        <div class="card"><p>Completed Semesters</p><h3 id="mba_all_sems"></h3></div>
+        <div class="card"><p>Risk Level</p><h3 id="mba_all_risk"></h3></div>
+      </div>
+      <div id="mba_sem_cards"></div>
+      <div class="charts">
+        <div class="chart-box"><h3>CGPA Per Semester</h3><canvas id="mba_all_barChart"></canvas></div>
+        <div class="chart-box"><h3>Overall Performance</h3><canvas id="mba_all_radarChart"></canvas></div>
+      </div>
+    </div>
+  </div>
 <script src="/static/script.js"></script>
 </body>
 </html>

@@ -271,6 +271,254 @@ def analyze_mca_all():
         'completed_sems': completed_sems,
         'risk': risk
     })
+    # ── BBA SINGLE SEM ROUTE ──
+@app.route('/analyze_bba_single', methods=['POST'])
+def analyze_bba_single():
+    data = request.json
+    name = data['name']
+    roll = data['roll']
+    college = data['college']
+    attendance = float(data['attendance'])
+    study_hours = float(data['study_hours'])
+    gender = data['gender']
+    semester = data['semester']
+    subjects = data['subjects']
+
+    subject_marks_list = [float(v) for v in subjects.values()]
+    total = sum(subject_marks_list)
+    percentage = round((total / 500) * 100, 2)
+    subject_pass = all(float(m) >= 35 for m in subjects.values())
+    status = "PASS" if subject_pass else "FAIL"
+    risk = predict_risk(attendance, study_hours, percentage)
+    subject_names = list(subjects.keys())
+    subject_marks = [float(v) for v in subjects.values()]
+    weak_subjects = [s for s, m in subjects.items() if float(m) < 35]
+    cgpa = calculate_cgpa(subject_marks)
+
+    return jsonify({
+        'name': name, 'roll': roll, 'college': college,
+        'semester': semester, 'total': total,
+        'percentage': percentage, 'status': status,
+        'risk': risk, 'cgpa': cgpa,
+        'subject_names': subject_names,
+        'subject_marks': subject_marks,
+        'weak_subjects': weak_subjects
+    })
+
+# ── BBA ALL SEMS ROUTE ──
+@app.route('/analyze_bba_all', methods=['POST'])
+def analyze_bba_all():
+    data = request.json
+    name = data['name']
+    roll = data['roll']
+    college = data['college']
+    attendance = float(data['attendance'])
+    study_hours = float(data['study_hours'])
+    gender = data['gender']
+    semesters = data['semesters']
+
+    sem_results = []
+    all_marks = []
+    total_points = 0
+    completed_sems = 0
+
+    for sem_num, subjects in semesters.items():
+        if any(float(v) > 0 for v in subjects.values()):
+            marks_list = [float(v) for v in subjects.values()]
+            total = sum(marks_list)
+            percentage = round((total / 500) * 100, 2)
+            cgpa = calculate_cgpa(marks_list)
+            subject_pass = all(float(m) >= 35 for m in subjects.values())
+            status = "PASS" if subject_pass else "FAIL"
+            weak = [s for s, m in subjects.items() if float(m) < 35]
+            all_marks.extend(marks_list)
+            total_points += cgpa
+            completed_sems += 1
+
+            sem_results.append({
+                'semester': sem_num, 'total': total,
+                'percentage': percentage, 'cgpa': cgpa,
+                'status': status, 'weak_subjects': weak,
+                'subject_names': list(subjects.keys()),
+                'subject_marks': marks_list
+            })
+
+    sgpa = round(total_points / completed_sems, 2) if completed_sems > 0 else 0
+    overall_percentage = round((sum(all_marks) / (completed_sems * 500)) * 100, 2)
+    risk = predict_risk(attendance, study_hours, overall_percentage)
+
+    return jsonify({
+        'name': name, 'roll': roll, 'college': college,
+        'sem_results': sem_results, 'sgpa': sgpa,
+        'overall_percentage': overall_percentage,
+        'completed_sems': completed_sems, 'risk': risk
+    })
+
+# ── BCOM SINGLE SEM ROUTE ──
+@app.route('/analyze_bcom_single', methods=['POST'])
+def analyze_bcom_single():
+    data = request.json
+    name = data['name']
+    roll = data['roll']
+    college = data['college']
+    attendance = float(data['attendance'])
+    study_hours = float(data['study_hours'])
+    gender = data['gender']
+    semester = data['semester']
+    subjects = data['subjects']
+
+    subject_marks_list = [float(v) for v in subjects.values()]
+    total = sum(subject_marks_list)
+    percentage = round((total / 500) * 100, 2)
+    subject_pass = all(float(m) >= 35 for m in subjects.values())
+    status = "PASS" if subject_pass else "FAIL"
+    risk = predict_risk(attendance, study_hours, percentage)
+    subject_names = list(subjects.keys())
+    subject_marks = [float(v) for v in subjects.values()]
+    weak_subjects = [s for s, m in subjects.items() if float(m) < 35]
+    cgpa = calculate_cgpa(subject_marks)
+
+    return jsonify({
+        'name': name, 'roll': roll, 'college': college,
+        'semester': semester, 'total': total,
+        'percentage': percentage, 'status': status,
+        'risk': risk, 'cgpa': cgpa,
+        'subject_names': subject_names,
+        'subject_marks': subject_marks,
+        'weak_subjects': weak_subjects
+    })
+
+# ── BCOM ALL SEMS ROUTE ──
+@app.route('/analyze_bcom_all', methods=['POST'])
+def analyze_bcom_all():
+    data = request.json
+    name = data['name']
+    roll = data['roll']
+    college = data['college']
+    attendance = float(data['attendance'])
+    study_hours = float(data['study_hours'])
+    gender = data['gender']
+    semesters = data['semesters']
+
+    sem_results = []
+    all_marks = []
+    total_points = 0
+    completed_sems = 0
+
+    for sem_num, subjects in semesters.items():
+        if any(float(v) > 0 for v in subjects.values()):
+            marks_list = [float(v) for v in subjects.values()]
+            total = sum(marks_list)
+            percentage = round((total / 500) * 100, 2)
+            cgpa = calculate_cgpa(marks_list)
+            subject_pass = all(float(m) >= 35 for m in subjects.values())
+            status = "PASS" if subject_pass else "FAIL"
+            weak = [s for s, m in subjects.items() if float(m) < 35]
+            all_marks.extend(marks_list)
+            total_points += cgpa
+            completed_sems += 1
+
+            sem_results.append({
+                'semester': sem_num, 'total': total,
+                'percentage': percentage, 'cgpa': cgpa,
+                'status': status, 'weak_subjects': weak,
+                'subject_names': list(subjects.keys()),
+                'subject_marks': marks_list
+            })
+
+    sgpa = round(total_points / completed_sems, 2) if completed_sems > 0 else 0
+    overall_percentage = round((sum(all_marks) / (completed_sems * 500)) * 100, 2)
+    risk = predict_risk(attendance, study_hours, overall_percentage)
+
+    return jsonify({
+        'name': name, 'roll': roll, 'college': college,
+        'sem_results': sem_results, 'sgpa': sgpa,
+        'overall_percentage': overall_percentage,
+        'completed_sems': completed_sems, 'risk': risk
+    })
+
+# ── MBA SINGLE SEM ROUTE ──
+@app.route('/analyze_mba_single', methods=['POST'])
+def analyze_mba_single():
+    data = request.json
+    name = data['name']
+    roll = data['roll']
+    college = data['college']
+    attendance = float(data['attendance'])
+    study_hours = float(data['study_hours'])
+    gender = data['gender']
+    semester = data['semester']
+    subjects = data['subjects']
+
+    subject_marks_list = [float(v) for v in subjects.values()]
+    total = sum(subject_marks_list)
+    percentage = round((total / 500) * 100, 2)
+    subject_pass = all(float(m) >= 35 for m in subjects.values())
+    status = "PASS" if subject_pass else "FAIL"
+    risk = predict_risk(attendance, study_hours, percentage)
+    subject_names = list(subjects.keys())
+    subject_marks = [float(v) for v in subjects.values()]
+    weak_subjects = [s for s, m in subjects.items() if float(m) < 35]
+    cgpa = calculate_cgpa(subject_marks)
+
+    return jsonify({
+        'name': name, 'roll': roll, 'college': college,
+        'semester': semester, 'total': total,
+        'percentage': percentage, 'status': status,
+        'risk': risk, 'cgpa': cgpa,
+        'subject_names': subject_names,
+        'subject_marks': subject_marks,
+        'weak_subjects': weak_subjects
+    })
+
+# ── MBA ALL SEMS ROUTE ──
+@app.route('/analyze_mba_all', methods=['POST'])
+def analyze_mba_all():
+    data = request.json
+    name = data['name']
+    roll = data['roll']
+    college = data['college']
+    attendance = float(data['attendance'])
+    study_hours = float(data['study_hours'])
+    gender = data['gender']
+    semesters = data['semesters']
+
+    sem_results = []
+    all_marks = []
+    total_points = 0
+    completed_sems = 0
+
+    for sem_num, subjects in semesters.items():
+        if any(float(v) > 0 for v in subjects.values()):
+            marks_list = [float(v) for v in subjects.values()]
+            total = sum(marks_list)
+            percentage = round((total / 500) * 100, 2)
+            cgpa = calculate_cgpa(marks_list)
+            subject_pass = all(float(m) >= 35 for m in subjects.values())
+            status = "PASS" if subject_pass else "FAIL"
+            weak = [s for s, m in subjects.items() if float(m) < 35]
+            all_marks.extend(marks_list)
+            total_points += cgpa
+            completed_sems += 1
+
+            sem_results.append({
+                'semester': sem_num, 'total': total,
+                'percentage': percentage, 'cgpa': cgpa,
+                'status': status, 'weak_subjects': weak,
+                'subject_names': list(subjects.keys()),
+                'subject_marks': marks_list
+            })
+
+    sgpa = round(total_points / completed_sems, 2) if completed_sems > 0 else 0
+    overall_percentage = round((sum(all_marks) / (completed_sems * 500)) * 100, 2)
+    risk = predict_risk(attendance, study_hours, overall_percentage)
+
+    return jsonify({
+        'name': name, 'roll': roll, 'college': college,
+        'sem_results': sem_results, 'sgpa': sgpa,
+        'overall_percentage': overall_percentage,
+        'completed_sems': completed_sems, 'risk': risk
+    })
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=False, host='0.0.0.0', port=port)
