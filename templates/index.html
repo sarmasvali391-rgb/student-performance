@@ -19,27 +19,28 @@
   <div class="course-select">
     <h2>Select Course</h2>
     <div class="course-buttons">
-  <!-- School -->
-  <div class="course-group">
-    <p class="group-label">School</p>
-    <button class="course-btn active" onclick="showCourse('puc')">📚 PUC</button>
-  </div>
+  <button class="course-btn active" onclick="showCategory('school')">📚 PUC</button>
+  <button class="course-btn" onclick="showCategory('degree')">🎓 Degree</button>
+  <button class="course-btn" onclick="showCategory('pg')">🎓 Post Graduate</button>
+</div>
 
-  <!-- Degree -->
-  <div class="course-group">
-    <p class="group-label">Degree</p>
-    <button class="course-btn" onclick="showCourse('bca')">🎓 BCA</button>
-    <button class="course-btn" onclick="showCourse('bba')">🎓 BBA</button>
-    <button class="course-btn" onclick="showCourse('bcom')">🎓 BCom</button>
-  </div>
+<div id="school-sub" class="sub-buttons" style="display:none">
+</div>
 
-  <!-- PG -->
-  <div class="course-group">
-    <p class="group-label">Post Graduate</p>
-    <button class="course-btn" onclick="showCourse('mca')">🎓 MCA</button>
-    <button class="course-btn" onclick="showCourse('mba')">🎓 MBA</button>
-  </div>
-  </div>
+<div id="school-sub" class="sub-buttons">
+  <button class="sub-btn active" onclick="showCourse('puc')">📚 PUC</button>
+</div>
+
+<div id="degree-sub" class="sub-buttons" style="display:none">
+  <button class="sub-btn" onclick="showCourse('bca')">🎓 BCA</button>
+  <button class="sub-btn" onclick="showCourse('bba')">🎓 BBA</button>
+  <button class="sub-btn" onclick="showCourse('bcom')">🎓 BCom</button>
+</div>
+
+<div id="pg-sub" class="sub-buttons" style="display:none">
+  <button class="sub-btn" onclick="showCourse('mca')">🎓 MCA</button>
+  <button class="sub-btn" onclick="showCourse('mba')">🎓 MBA</button>
+</div>
 
   <!-- PUC SECTION -->
   <div id="puc-section">
