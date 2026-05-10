@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      color: #333;
+    }
+
+    header {
+      background: linear-gradient(135deg, #000000, #434343);
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+
+    header p {
+      font-size: 0.85rem;
+      opacity: 0.7;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 15px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      border-bottom: 4px solid #1a73e8;
+    }
+
+    .stat-card p {
+      font-size: 0.8rem;
+      color: #666;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .stat-card h2 {
+      font-size: 2rem;
+      color: #1a73e8;
+      font-weight: 900;
+    }
+
+    .section {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      margin-bottom: 30px;
+    }
+
+    .section h2 {
+      font-size: 1.3rem;
+      color: #1a73e8;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #e0e0e0;
+      padding-bottom: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background: #1a73e8;
+      color: white;
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.9rem;
+    }
+
+    tr:nth-child(even) {
+      background: #f8f9ff;
+    }
+
+    tr:hover {
+      background: #e8f0fe;
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .badge-blue {
+      background: #e8f0fe;
+      color: #1a73e8;
+    }
+
+    .badge-green {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .badge-orange {
+      background: #fff3e0;
+      color: #e65100;
+    }
+
+    .search-box {
+      padding: 10px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      outline: none;
+      width: 300px;
+      margin-bottom: 20px;
+    }
+
+    .search-box:focus {
+      border-color: #1a73e8;
+    }
+
+    @media (max-width: 600px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      table { font-size: 0.8rem; }
+      th, td { padding: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>👑 Admin Dashboard</h1>
+    <p>Student Performance Analysis System</p>
+  </div>
+  <div>
+    <p>🔒 Secure Admin Access</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-card">
+      <p>Total Users</p>
+      <h2>{{ total_users }}</h2>
+    </div>
+    <div class="stat-card">
+      <p>Total Visits</p>
+      <h2>{{ total_visits }}</h2>
+    </div>
+    <div class="stat-card">
+      <p>Today's Visits</p>
+      <h2 id="today_visits">-</h2>
+    </div>
+  </div>
+
+  <!-- VISITS TABLE -->
+  <div class="section">
+    <h2>📊 User Visit History</h2>
+    <input type="text" class="search-box"
+      placeholder="🔍 Search by username or email..."
+      onkeyup="searchTable('visits_table', this.value)">
+
+    <table id="visits_table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Login Time</th>
+          <th>Course Used</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for visit in visits|reverse %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ visit.username }}</td>
+          <td>{{ visit.email }}</td>
+          <td>{{ visit.time }}</td>
+          <td>
+            <span class="badge badge-blue">{{ visit.course }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- USERS TABLE -->
+  <div class="section">
+    <h2>👥 Registered Users</h2>
+    <input type="text" class="search-box"
+      placeholder="🔍 Search by username or email..."
+      onkeyup="searchTable('users_table', this.value)">
+
+    <table id="users_table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Joined Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for email, user in users.items() %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ user.username }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.created }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+// Count today's visits
+const today = new Date().toLocaleDateString('en-GB');
+const rows = document.querySelectorAll('#visits_table tbody tr');
+let todayCount = 0;
+rows.forEach(row => {
+  const time = row.cells[3].textContent;
+  if (time.startsWith(today)) todayCount++;
+});
+document.getElementById('today_visits').textContent = todayCount;
+
+// Search function
+function searchTable(tableId, query) {
+  const table = document.getElementById(tableId);
+  const rows = table.querySelectorAll('tbody tr');
+  query = query.toLowerCase();
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(query) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

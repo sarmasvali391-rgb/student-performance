@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - Student Performance System</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0a0a0f, #1a1a2e, #16213e);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .signup-box {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .logo h1 {
+      font-size: 1.8rem;
+      color: #1a73e8;
+      font-weight: 800;
+    }
+
+    .logo p {
+      color: #666;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #444;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    input:focus {
+      border-color: #1a73e8;
+      box-shadow: 0 0 0 4px rgba(26,115,232,0.1);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #34a853, #1b5e20);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(52,168,83,0.4);
+    }
+
+    .links {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .links a {
+      color: #1a73e8;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .links a:hover {
+      text-decoration: underline;
+    }
+
+    .message {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: none;
+      text-align: center;
+    }
+
+    .error {
+      background: #fce8e8;
+      color: #c62828;
+      border: 1px solid #ef9a9a;
+    }
+
+    .success {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #a5d6a7;
+    }
+
+    .divider {
+      text-align: center;
+      margin: 16px 0;
+      color: #999;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="signup-box">
+  <div class="logo">
+    <h1>📊 EduAnalytics</h1>
+    <p>Create Your Account</p>
+  </div>
+
+  <div class="message" id="message"></div>
+
+  <div class="form-group">
+    <label>Username</label>
+    <input type="text" id="username" placeholder="Enter your name">
+  </div>
+
+  <div class="form-group">
+    <label>Email Address</label>
+    <input type="email" id="email" placeholder="Enter your email">
+  </div>
+
+  <div class="form-group">
+    <label>Password</label>
+    <input type="password" id="password" placeholder="Create a password">
+  </div>
+
+  <div class="form-group">
+    <label>Confirm Password</label>
+    <input type="password" id="confirm_password" placeholder="Confirm your password">
+  </div>
+
+  <button class="btn" onclick="signupUser()">✨ Create Account</button>
+
+  <div class="divider">─────── or ───────</div>
+
+  <div class="links">
+    <a href="/login">🔐 Already have account? Login</a>
+  </div>
+</div>
+
+<script>
+async function signupUser() {
+  const username = document.getElementById('username').value;
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const confirm = document.getElementById('confirm_password').value;
+
+  if (!username || !email || !password || !confirm) {
+    showMessage('Please fill all fields!', 'error');
+    return;
+  }
+
+  if (password !== confirm) {
+    showMessage('Passwords do not match!', 'error');
+    return;
+  }
+
+  if (password.length < 6) {
+    showMessage('Password must be at least 6 characters!', 'error');
+    return;
+  }
+
+  const response = await fetch('/signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, email, password })
+  });
+
+  const data = await response.json();
+
+  if (data.success) {
+    showMessage('Account created successfully! Redirecting to login...', 'success');
+    setTimeout(() => { window.location.href = '/login'; }, 2000);
+  } else {
+    showMessage(data.message, 'error');
+  }
+}
+
+function showMessage(msg, type) {
+  const el = document.getElementById('message');
+  el.textContent = msg;
+  el.className = 'message ' + type;
+  el.style.display = 'block';
+}
+
+document.addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') signupUser();
+});
+</script>
+</body>
+</html>
