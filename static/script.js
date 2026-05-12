@@ -15,15 +15,25 @@ const bcaSubjects = {
 
 // ── COURSE SELECTION ──
 function showCourse(course) {
-  document.getElementById('puc-section').style.display = course === 'puc' ? 'block' : 'none';
-  document.getElementById('bca-section').style.display = course === 'bca' ? 'block' : 'none';
-  document.querySelectorAll('.course-btn').forEach(btn => btn.classList.remove('active'));
-  event.target.classList.add('active');
+  ['puc', 'bca', 'bba', 'bcom', 'mca', 'mba'].forEach(c => {
+    const el = document.getElementById(c + '-section');
+    if (el) el.style.display = 'none';
+  });
 
-  if (course === 'bca') {
-    loadBCASingleSubjects();
-    loadBCAAllSubjects();
-  }
+  const section = document.getElementById(course + '-section');
+  if (section) section.style.display = 'block';
+
+  document.querySelectorAll('.sub-btn').forEach(btn => btn.classList.remove('active'));
+  if (event && event.target) event.target.classList.add('active');
+
+  // Update course tracking
+  updateCourse(course.toUpperCase());
+
+  if (course === 'bca') { loadBCASingleSubjects(); loadBCAAllSubjects(); }
+  if (course === 'mca') { loadMCASingleSubjects(); loadMCAAllSubjects(); }
+  if (course === 'bba') { loadBBASingleSubjects(); loadBBAAllSubjects(); }
+  if (course === 'bcom') { loadBComSingleSubjects(); loadBComAllSubjects(); }
+  if (course === 'mba') { loadMBASingleSubjects(); loadMBAAllSubjects(); }
 }
 
 // ── BCA MODE SELECTION ──
@@ -1711,23 +1721,39 @@ function printAllPDF(course, name, roll, college, sgpa, pct, sems, risk, cards) 
   setTimeout(() => { w.print(); }, 500);
 }
 function showCategory(category) {
-  // Hide all sub buttons
   document.getElementById('school-sub').style.display = 'none';
   document.getElementById('degree-sub').style.display = 'none';
   document.getElementById('pg-sub').style.display = 'none';
-
-  // Show selected category
   document.getElementById(category + '-sub').style.display = 'flex';
-
-  // Update active category button
   document.querySelectorAll('.course-btn').forEach(btn => btn.classList.remove('active'));
   event.target.classList.add('active');
 
-  // Hide all sections
   ['puc', 'bca', 'bba', 'bcom', 'mca', 'mba'].forEach(c => {
     const el = document.getElementById(c + '-section');
     if (el) el.style.display = 'none';
   });
+
+  if (category === 'school') {
+    document.getElementById('puc-section').style.display = 'block';
+    updateCourse('PUC');
+    const schoolBtn = document.querySelector('#school-sub .sub-btn');
+    if (schoolBtn) schoolBtn.classList.add('active');
+  }
+  if (category === 'degree') {
+    document.getElementById('bca-section').style.display = 'block';
+    loadBCASingleSubjects();
+    loadBCAAllSubjects();
+    updateCourse('BCA');
+    document.querySelector('#degree-sub .sub-btn').classList.add('active');
+  }
+  if (category === 'pg') {
+    document.getElementById('mca-section').style.display = 'block';
+    loadMCASingleSubjects();
+    loadMCAAllSubjects();
+    updateCourse('MCA');
+    document.querySelector('#pg-sub .sub-btn').classList.add('active');
+  }
+}
 
   // Auto show first course
   if (category === 'school') {
@@ -1745,5 +1771,16 @@ function showCategory(category) {
     loadMCASingleSubjects();
     loadMCAAllSubjects();
     document.querySelector('#pg-sub .sub-btn').classList.add('active');
+  }
+}
+async function updateCourse(course) {
+  try {
+    await fetch('/update_course', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ course: course })
+    });
+  } catch (error) {
+    console.log('Course update error:', error);
   }
 }
