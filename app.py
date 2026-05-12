@@ -4,8 +4,6 @@ import json
 import random
 import hashlib
 from datetime import datetime
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 
 app = Flask(__name__)
 app.secret_key = 'sarmasproject2026'
@@ -34,17 +32,6 @@ def load_visits():
 def save_visits(visits):
     with open(VISITS_FILE, 'w') as f:
         json.dump(visits, f, indent=2)
-
-def save_to_google_sheet(username, email, time, course):
-    try:
-        scope = ['https://spreadsheets.google.com/feeds',
-                 'https://www.googleapis.com/auth/drive']
-        creds = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scope)
-        client = gspread.authorize(creds)
-        sheet = client.open('student visitors').sheet1
-        sheet.append_row([username, email, time, course])
-    except Exception as e:
-        print(f"Google Sheets error: {e}")
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -86,15 +73,6 @@ def login():
         'course': 'Not selected yet'
     })
     save_visits(visits)
-
-    # Save to Google Sheets
-    save_to_google_sheet(
-        users[email]['username'],
-        email,
-        visit_time,
-        'Not selected yet'
-    )
-
     return jsonify({'success': True, 'message': 'Login successful!'})
 
 @app.route('/signup', methods=['GET', 'POST'])
