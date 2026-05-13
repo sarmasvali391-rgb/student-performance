@@ -16,31 +16,26 @@
 </header>
 
 <!-- COURSE SELECTION -->
-<div class="container">
-  <div class="course-select">
-    <h2>Select Course</h2>
-    <div class="course-buttons">
-  <button class="course-btn active" onclick="showCategory('school')">📚 PUC</button>
-  <button class="course-btn" onclick="showCategory('degree')">🎓 Degree</button>
-  <button class="course-btn" onclick="showCategory('pg')">🎓 Post Graduate</button>
-</div>
+<div class="course-select">
+  <h2>Select Course</h2>
 
-<div id="school-sub" class="sub-buttons" style="display:none">
-</div>
+  <div class="course-buttons">
+    <button class="course-btn active" onclick="showCategory('school', this)">📚 PUC</button>
+    <button class="course-btn" onclick="showCategory('degree', this)">🎓 Degree</button>
+    <button class="course-btn" onclick="showCategory('pg', this)">🎓 Post Graduate</button>
+  </div>
 
-<div id="school-sub" class="sub-buttons">
-  <button class="sub-btn active" onclick="showCourse('puc')">📚 PUC</button>
-</div>
+  <div id="degree-sub" class="sub-buttons" style="display:none">
+    <button class="sub-btn" onclick="showCourse('bca', this)">🎓 BCA</button>
+    <button class="sub-btn" onclick="showCourse('bba', this)">🎓 BBA</button>
+    <button class="sub-btn" onclick="showCourse('bcom', this)">🎓 BCom</button>
+    <button class="sub-btn" onclick="showCourse('bsc', this)">🎓 B.Sc</button>
+  </div>
 
-<div id="degree-sub" class="sub-buttons" style="display:none">
-  <button class="sub-btn" onclick="showCourse('bca')">🎓 BCA</button>
-  <button class="sub-btn" onclick="showCourse('bba')">🎓 BBA</button>
-  <button class="sub-btn" onclick="showCourse('bcom')">🎓 BCom</button>
-</div>
-
-<div id="pg-sub" class="sub-buttons" style="display:none">
-  <button class="sub-btn" onclick="showCourse('mca')">🎓 MCA</button>
-  <button class="sub-btn" onclick="showCourse('mba')">🎓 MBA</button>
+  <div id="pg-sub" class="sub-buttons" style="display:none">
+    <button class="sub-btn" onclick="showCourse('mca', this)">🎓 MCA</button>
+    <button class="sub-btn" onclick="showCourse('mba', this)">🎓 MBA</button>
+  </div>
 </div>
 
   <!-- PUC SECTION -->
@@ -680,6 +675,7 @@
       </div>
     </div>
   </div>
+  
 <script src="/static/script.js"></script>
 </body>
 </html>
