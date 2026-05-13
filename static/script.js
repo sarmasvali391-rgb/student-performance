@@ -882,6 +882,223 @@ function printAllPDF(course, name, roll, college, sgpa, pct, sems, risk, cards) 
   setTimeout(()=>{w.print();},500);
 }
 
+// ── BSC SUBJECTS ──
+const bscSubjects = {
+  'Semester 1': ['English','Mathematics','Physics','Chemistry','Computer Science'],
+  'Semester 2': ['Advanced Mathematics','Applied Physics','Organic Chemistry','Programming in C','Environmental Science'],
+  'Semester 3': ['Linear Algebra','Optics and Electronics','Physical Chemistry','Data Structures','Statistics'],
+  'Semester 4': ['Numerical Methods','Quantum Mechanics','Inorganic Chemistry','Database Management','Probability Theory'],
+  'Semester 5': ['Real Analysis','Solid State Physics','Spectroscopy','Operating Systems','Elective 1'],
+  'Semester 6': ['Complex Analysis','Nuclear Physics','Polymer Chemistry','Computer Networks','Project Work']
+};
+
+// ── BSC MODE ──
+function showBScMode(mode) {
+  document.getElementById('bsc_single_mode').style.display = mode === 'single' ? 'block' : 'none';
+  document.getElementById('bsc_all_mode').style.display = mode === 'all' ? 'block' : 'none';
+  document.querySelectorAll('#bsc-section .mode-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// ── LOAD BSC SUBJECTS ──
+function loadBScSingleSubjects() {
+  const sem = document.getElementById('bsc_semester').value;
+  const subjects = bscSubjects[sem];
+  let html = '';
+  subjects.forEach(sub => {
+    const id = sub.replace(/\s+/g,'_').toLowerCase();
+    html += `<div class="form-group"><label>${sub}</label><input type="number" id="bsc_single_${id}" placeholder="e.g. 75"></div>`;
+  });
+  document.getElementById('bsc_single_subjects').innerHTML = html;
+}
+
+function loadBScAllSubjects() {
+  let html = '';
+  Object.entries(bscSubjects).forEach(([sem, subjects]) => {
+    html += `<h3>📖 ${sem}</h3>`;
+    subjects.forEach(sub => {
+      const id = sub.replace(/\s+/g,'_').toLowerCase();
+      html += `<div class="form-group"><label>${sub}</label><input type="number" id="bsc_all_${sem.replace(/\s+/g,'_')}_${id}" placeholder="e.g. 75"></div>`;
+    });
+  });
+  document.getElementById('bsc_all_subjects').innerHTML = html;
+}
+
+// ── ANALYZE BSC SINGLE ──
+async function analyzeBScSingle() {
+  const name = document.getElementById('bsc_name').value;
+  const roll = document.getElementById('bsc_roll').value;
+  const college = document.getElementById('bsc_college').value;
+  const attendance = document.getElementById('bsc_attendance').value;
+  const study_hours = document.getElementById('bsc_study_hours').value;
+  const semester = document.getElementById('bsc_semester').value;
+
+  if (!name || !attendance || !study_hours) { alert('Please fill all fields!'); return; }
+
+  const subjects = {};
+  bscSubjects[semester].forEach(sub => {
+    const id = sub.replace(/\s+/g,'_').toLowerCase();
+    subjects[sub] = document.getElementById('bsc_single_' + id)?.value || 0;
+  });
+
+  const payload = { name, roll, college, attendance, study_hours,
+    gender: document.getElementById('bsc_gender').value, semester, subjects };
+
+  try {
+    const response = await fetch('/analyze_bsc_single', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+
+    document.getElementById('bsc_single_results').style.display = 'block';
+    document.getElementById('bsc_res_name').textContent = data.name;
+    document.getElementById('bsc_res_total').textContent = data.total + ' / 500';
+    document.getElementById('bsc_res_pct').textContent = data.percentage + '%';
+    document.getElementById('bsc_res_cgpa').textContent = data.cgpa;
+    document.getElementById('bsc_res_status').textContent = data.status.includes('PASS') ? '✅ PASS' : '❌ FAIL';
+    document.getElementById('bsc_res_risk').textContent = getRiskEmoji(data.risk);
+    document.getElementById('bsc_res_weak').textContent = data.weak_subjects.length > 0 ? data.weak_subjects.join(', ') : 'None ✅';
+    document.getElementById('bsc_single_results').scrollIntoView({behavior:'smooth'});
+
+    if (window.bscBarChart) window.bscBarChart.destroy();
+    if (window.bscRadarChart) window.bscRadarChart.destroy();
+
+    window.bscBarChart = new Chart(document.getElementById('bsc_barChart'), {
+      type: 'bar',
+      data: { labels: data.subject_names, datasets: [{ label: 'Marks out of 100', data: data.subject_marks, backgroundColor: ['#4f46e5','#06b6d4','#10b981','#f59e0b','#ef4444'], borderRadius: 8 }] },
+      options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
+    });
+
+    window.bscRadarChart = new Chart(document.getElementById('bsc_radarChart'), {
+      type: 'radar',
+      data: { labels: data.subject_names, datasets: [{ label: 'Marks', data: data.subject_marks, backgroundColor: 'rgba(79,70,229,0.2)', borderColor: '#4f46e5', pointBackgroundColor: '#4f46e5', borderWidth: 2 }] },
+      options: { responsive: true, scales: { r: { beginAtZero: true, max: 100 } } }
+    });
+  } catch(error) { alert('Error! Make sure python app.py is running!'); }
+}
+
+// ── ANALYZE BSC ALL ──
+async function analyzeBScAll() {
+  const name = document.getElementById('bsc_name').value;
+  const roll = document.getElementById('bsc_roll').value;
+  const college = document.getElementById('bsc_college').value;
+  const attendance = document.getElementById('bsc_attendance').value;
+  const study_hours = document.getElementById('bsc_study_hours').value;
+
+  if (!name || !attendance || !study_hours) { alert('Please fill all fields!'); return; }
+
+  const semesters = {};
+  Object.entries(bscSubjects).forEach(([sem, subjects]) => {
+    semesters[sem] = {};
+    subjects.forEach(sub => {
+      const id = sub.replace(/\s+/g,'_').toLowerCase();
+      semesters[sem][sub] = document.getElementById('bsc_all_' + sem.replace(/\s+/g,'_') + '_' + id)?.value || 0;
+    });
+  });
+
+  const payload = { name, roll, college, attendance, study_hours,
+    gender: document.getElementById('bsc_gender').value, semesters };
+
+  try {
+    const response = await fetch('/analyze_bsc_all', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+
+    document.getElementById('bsc_all_results').style.display = 'block';
+    document.getElementById('bsc_all_res_name').textContent = data.name;
+    document.getElementById('bsc_all_sgpa').textContent = data.sgpa;
+    document.getElementById('bsc_all_pct').textContent = data.overall_percentage + '%';
+    document.getElementById('bsc_all_sems').textContent = data.completed_sems + ' / 6';
+    document.getElementById('bsc_all_risk').textContent = getRiskEmoji(data.risk);
+
+    let semHtml = '<div class="sem-cards">';
+    data.sem_results.forEach(sem => {
+      semHtml += `<div class="sem-card"><h3>${sem.semester}</h3>
+        <p>Total: ${sem.total}/500</p>
+        <p>Percentage: ${sem.percentage}%</p>
+        <p>CGPA: ${sem.cgpa}</p>
+        <p>Status: ${sem.status.includes('PASS') ? '✅ PASS' : '❌ FAIL'}</p>
+        ${sem.weak_subjects.length > 0 ? '<p>Weak: ' + sem.weak_subjects.join(', ') + '</p>' : '<p>No weak subjects ✅</p>'}
+        </div>`;
+    });
+    semHtml += '</div>';
+    document.getElementById('bsc_sem_cards').innerHTML = semHtml;
+    document.getElementById('bsc_all_results').scrollIntoView({behavior:'smooth'});
+
+    if (window.bscAllBarChart) window.bscAllBarChart.destroy();
+    if (window.bscAllRadarChart) window.bscAllRadarChart.destroy();
+
+    window.bscAllBarChart = new Chart(document.getElementById('bsc_all_barChart'), {
+      type: 'bar',
+      data: { labels: data.sem_results.map(s => s.semester), datasets: [{ label: 'CGPA', data: data.sem_results.map(s => s.cgpa), backgroundColor: ['#4f46e5','#06b6d4','#10b981','#f59e0b','#ef4444','#8b5cf6'], borderRadius: 8 }] },
+      options: { responsive: true, scales: { y: { beginAtZero: true, max: 10 } } }
+    });
+
+    window.bscAllRadarChart = new Chart(document.getElementById('bsc_all_radarChart'), {
+      type: 'radar',
+      data: { labels: data.sem_results.map(s => s.semester), datasets: [{ label: 'Percentage', data: data.sem_results.map(s => s.percentage), backgroundColor: 'rgba(79,70,229,0.2)', borderColor: '#4f46e5', pointBackgroundColor: '#4f46e5', borderWidth: 2 }] },
+      options: { responsive: true, scales: { r: { beginAtZero: true, max: 100 } } }
+    });
+  } catch(error) { alert('Error! Make sure python app.py is running!'); }
+}
+
+// ── BSC PDF ──
+function saveBScSinglePDF() {
+  const name = document.getElementById('bsc_res_name').textContent;
+  const status = document.getElementById('bsc_res_status').textContent;
+  const risk = document.getElementById('bsc_res_risk').textContent;
+  const semester = document.getElementById('bsc_semester').value;
+  const subjects = bscSubjects[semester];
+  let subjectRows = '';
+  subjects.forEach(sub => {
+    const id = sub.replace(/\s+/g,'_').toLowerCase();
+    const marks = document.getElementById('bsc_single_' + id)?.value || 0;
+    subjectRows += `<tr><td>${sub}</td><td>${marks}</td><td class="${marks>=35?'pass':'fail'}">${marks>=35?'✅ PASS':'❌ FAIL'}</td></tr>`;
+  });
+  printPDF('B.Sc', name, semester, status, risk, subjectRows,
+    document.getElementById('bsc_res_total').textContent,
+    document.getElementById('bsc_res_pct').textContent,
+    document.getElementById('bsc_res_cgpa').textContent,
+    document.getElementById('bsc_roll').value,
+    document.getElementById('bsc_college').value,
+    document.getElementById('bsc_res_weak').textContent);
+}
+
+function saveBScAllPDF() {
+  printAllPDF('B.Sc',
+    document.getElementById('bsc_all_res_name').textContent,
+    document.getElementById('bsc_roll').value,
+    document.getElementById('bsc_college').value,
+    document.getElementById('bsc_all_sgpa').textContent,
+    document.getElementById('bsc_all_pct').textContent,
+    document.getElementById('bsc_all_sems').textContent,
+    document.getElementById('bsc_all_risk').textContent,
+    document.querySelectorAll('#bsc_sem_cards .sem-card'));
+}
+
+// ── UPDATE SHOW COURSE FOR BSC ──
+function showCourse(course, btn) {
+  ['puc','bca','bba','bcom','bsc','mca','mba'].forEach(c => {
+    const el = document.getElementById(c + '-section');
+    if (el) el.style.display = 'none';
+  });
+  const section = document.getElementById(course + '-section');
+  if (section) section.style.display = 'block';
+  document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (course === 'bca') { loadBCASingleSubjects(); loadBCAAllSubjects(); }
+  if (course === 'mca') { loadMCASingleSubjects(); loadMCAAllSubjects(); }
+  if (course === 'bba') { loadBBASingleSubjects(); loadBBAAllSubjects(); }
+  if (course === 'bcom') { loadBComSingleSubjects(); loadBComAllSubjects(); }
+  if (course === 'mba') { loadMBASingleSubjects(); loadMBAAllSubjects(); }
+  if (course === 'bsc') { loadBScSingleSubjects(); loadBScAllSubjects(); }
+}
+
 // ── DOM READY ──
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('puc-section').style.display = 'block';
@@ -895,4 +1112,6 @@ document.addEventListener('DOMContentLoaded', function() {
   if (bcomSem) bcomSem.addEventListener('change', loadBComSingleSubjects);
   const mbaSem = document.getElementById('mba_semester');
   if (mbaSem) mbaSem.addEventListener('change', loadMBASingleSubjects);
+  const bscSem = document.getElementById('bsc_semester');
+  if (bscSem) bscSem.addEventListener('change', loadBScSingleSubjects);
 });
