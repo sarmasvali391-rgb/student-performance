@@ -689,3 +689,29 @@ input:focus { animation: glowPulse 1.5s ease-in-out infinite alternate; }
   #printBtn { display: none; }
   .course-select { display: none; }
 }
+
+#emailBtn {
+  background: linear-gradient(135deg, #ea4335, #c62828);
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-bottom: 24px;
+  margin-left: 10px;
+  width: auto;
+  box-shadow: 0 4px 15px rgba(234,67,53,0.4);
+  transition: all 0.2s;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+#emailBtn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(234,67,53,0.5);
+}
+
+#emailBtn:active {
+  transform: translateY(2px) scale(0.96) !important;
+}
