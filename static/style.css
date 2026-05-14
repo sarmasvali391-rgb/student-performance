@@ -715,3 +715,8 @@ input:focus { animation: glowPulse 1.5s ease-in-out infinite alternate; }
 #emailBtn:active {
   transform: translateY(2px) scale(0.96) !important;
 }
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}

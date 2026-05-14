@@ -89,9 +89,9 @@
     <!-- PUC RESULTS -->
     <div class="results-box" id="puc_results" style="display:none">
       <h2>📋 Results for <span id="puc_res_name"></span></h2>
-      <button onclick="savePUCPDF()" id="printBtn">📄 Save as PDF</button>
+      <button onclick="savePUCPDF()" id="printBtn">📄 save as pdf as PDF</button>
       <button onclick="emailPUCReport()" id="emailBtn">📧 Share via Email</button>
-      <div class="cards">
+        <div class="cards">
         <div class="card">
           <p>Total Marks (out of 500)</p>
           <h3 id="puc_res_total"></h3>
@@ -198,7 +198,7 @@
     <!-- BCA SINGLE RESULTS -->
     <div class="results-box" id="bca_single_results" style="display:none">
       <h2>📋 Results for <span id="bca_res_name"></span></h2>
-      <button onclick="saveBCASinglePDF()" id="printBtn">📄 Save as PDF</button>
+      <button onclick="save as pdfBCASinglePDF()" id="printBtn">📄 save as pdf as PDF</button>
       <div class="cards">
         <div class="card">
           <p>Total Marks (out of 500)</p>
@@ -240,7 +240,7 @@
     <!-- BCA ALL RESULTS -->
     <div class="results-box" id="bca_all_results" style="display:none">
       <h2>📋 All Semesters Results for <span id="bca_all_res_name"></span></h2>
-      <button onclick="saveBCAAllPDF()" id="printBtn">📄 Save as PDF</button>
+      <button onclick="save as pdfBCAAllPDF()" id="printBtn">📄 save as pdf as PDF</button>
       <div class="cards">
         <div class="card">
           <p>SGPA</p>
@@ -338,7 +338,7 @@
     <!-- MCA SINGLE RESULTS -->
     <div class="results-box" id="mca_single_results" style="display:none">
       <h2>📋 Results for <span id="mca_res_name"></span></h2>
-      <button onclick="saveMCASinglePDF()" id="printBtn">📄 Save as PDF</button>
+      <button onclick="saveMCASinglePDF()" id="printBtn">📄 savepdf as PDF</button>
       <div class="cards">
         <div class="card">
           <p>Total Marks (out of 500)</p>
@@ -380,7 +380,7 @@
     <!-- MCA ALL RESULTS -->
     <div class="results-box" id="mca_all_results" style="display:none">
       <h2>📋 All Semesters Results for <span id="mca_all_res_name"></span></h2>
-      <button onclick="saveMCAAllPDF()" id="printBtn">📄 Save as PDF</button>
+      <button onclick="saveMCAAllPDF()" id="printBtn">📄 savepdf as PDF</button>
       <div class="cards">
         <div class="card">
           <p>SGPA</p>
@@ -470,7 +470,7 @@
     </div>
     <div class="results-box" id="bba_single_results" style="display:none">
       <h2>📋 Results for <span id="bba_res_name"></span></h2>
-      <button onclick="saveBBASinglePDF()" id="printBtn">📄 Save as PDF</button>
+      <button onclick="saveBBASinglePDF()" id="printBtn">📄 savepdf as PDF</button>
       <div class="cards">
         <div class="card"><p>Total Marks (out of 500)</p><h3 id="bba_res_total"></h3></div>
         <div class="card"><p>Percentage</p><h3 id="bba_res_pct"></h3></div>
@@ -771,5 +771,8 @@
   </div>
   
 <script src="/static/script.js"></script>
+<button onclick="emailPUCReport()" id="emailBtn">
+📧 Share via Email
+</button>
 </body>
 </html>
