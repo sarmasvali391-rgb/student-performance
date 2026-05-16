@@ -11,6 +11,7 @@ app.secret_key = 'sarmasproject2026'
 # ── FILE PATHS ──
 USERS_FILE = 'users.json'
 VISITS_FILE = 'visits.json'
+COURSE_FILE = 'courses.json'
 
 # ── HELPER FUNCTIONS ──
 def load_users():
@@ -36,12 +37,15 @@ def save_visits(visits):
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-# ── AUTH ROUTES ──
+    # ── AUTH ROUTES ──
 @app.route('/')
 def home():
     if 'user' not in session:
         return redirect(url_for('login'))
     return render_template('index.html', username=session['user'])
+
+from datetime import datetime
+from flask import request, jsonify, render_template, session
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -49,22 +53,21 @@ def login():
         return render_template('login.html')
 
     data = request.json
+
     email = data.get('email', '').lower().strip()
     password = data.get('password', '')
 
     users = load_users()
 
     if email not in users:
-        return jsonify({'success': False, 'message': 'Email not found! Please sign up.'})
+        return jsonify({'success': False, 'message': "Email not found! Please sign up."})
 
     if users[email]['password'] != hash_password(password):
-        return jsonify({'success': False, 'message': 'Wrong password! Try again.'})
+        return jsonify({'success': False, 'message': "Wrong password! Please try again."})
 
-    session['user'] = users[email]['username']
-    session['email'] = email
+    # ✅ FIX 1: define visit_time
+    visit_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Log visit
-    visit_time = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
     visits = load_visits()
     visits.append({
         'username': users[email]['username'],
@@ -73,7 +76,18 @@ def login():
         'course': 'Not selected yet'
     })
     save_visits(visits)
-    return jsonify({'success': True, 'message': 'Login successful!'})
+
+    # ✅ FIX 2: session BEFORE return
+    session['user'] = users[email]['username']
+    session['email'] = email
+
+    return jsonify({"success": True, "message": "Login successful!"})
+
+    session['user'] = users[email]['username']
+    session['email'] = email
+
+   # log visits
+
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -91,7 +105,7 @@ def signup():
     users = load_users()
 
     if email in users:
-        return jsonify({'success': False, 'message': 'Email already exists! Please login.'})
+        return jsonify({"success": False, "message": "Email already exists! Please login."})
 
     users[email] = {
         'username': username,
@@ -101,7 +115,7 @@ def signup():
     }
     save_users(users)
 
-    return jsonify({'success': True, 'message': 'Account created! Please login.'})
+    return jsonify({"success": True, "message": "Account created! Please login."})
 
 @app.route('/forgot', methods=['GET', 'POST'])
 def forgot():
@@ -123,24 +137,32 @@ def forgot():
         session['reset_code'] = code
         session['reset_email'] = email
 
-        return jsonify({'success': True, 'code': code, 'message': 'Reset code generated!'})
+        return jsonify({"success": True, "code": code, "message": "Reset code generated!"})
 
-    if action == 'reset_password':
-        code = data.get('code', '')
-        new_password = data.get('password', '')
+    if action == "reset_password":
+        code = data.get("code", '')
+        new_password = data.get("password", "")
 
-        if code != session.get('reset_code'):
-            return jsonify({'success': False, 'message': 'Wrong code! Try again.'})
+        if code != session.get("reset_code"):
+            return jsonify({"success": False, "message": "Wrong code! Try again."})
 
-        email = session.get('reset_email')
+        email = session.get("reset_email")
+       
+        if not email:
+           return jsonify({"success": False, "message": "Session expired. Try again."})
+
         users = load_users()
-        users[email]['password'] = hash_password(new_password)
+
+        if email not in users:
+           return jsonify({"success": False, "message": "User not found."})
+
+        users[email]["password"] = hash_password(new_password)
         save_users(users)
 
-        session.pop('reset_code', None)
-        session.pop('reset_email', None)
+        session.pop("reset_code", None)
+        session.pop("reset_email", None)
 
-        return jsonify({'success': True, 'message': 'Password reset successful!'})
+        return jsonify({"success": True, "message": "Password reset successful!"})
 
 @app.route('/logout')
 def logout():
@@ -149,17 +171,27 @@ def logout():
 
 @app.route('/update_course', methods=['POST'])
 def update_course():
-    data = request.json
-    course = data.get('course', '')
-    email = session.get('email', '')
+    try:
+        data = request.json
+        course = data.get('course', '')
+        email = session.get('email')
 
-    visits = load_visits()
-    for visit in reversed(visits):
-        if visit['email'] == email:
-            visit['course'] = course
-            break
-    save_visits(visits)
-    return jsonify({'success': True})
+        if not email:
+            return jsonify({"success": False, "message": "User not logged in"})
+
+        visits = load_visits()
+
+        for visit in reversed(visits):
+            if visit.get('email') == email:
+                visit['course'] = course
+                break
+
+        save_visits(visits)
+
+        return jsonify({'success': True, 'message': 'Course updated'})
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 # ── ADMIN ROUTE ──
 @app.route('/admin')

@@ -1,58 +1,67 @@
 function showCategory(category, btn) {
+  document.querySelectorAll('.course-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
 
-  // Hide sub menus first
-  document.getElementById("degree-sub").style.display = "none";
-  document.getElementById("pg-sub").style.display = "none";
+  document.getElementById('degree-sub').style.display = 'none';
+  document.getElementById('pg-sub').style.display = 'none';
 
-  // Remove active class
-  document.querySelectorAll(".course-btn").forEach(button => {
-    button.classList.remove("active");
+  ['puc','bca','bba','bcom','bsc','mca','mba'].forEach(c => {
+    const el = document.getElementById(c + '-section');
+    if (el) el.style.display = 'none';
   });
 
-  btn.classList.add("active");
-
-  // Show PUC directly
-  if(category === "school"){
-    document.getElementById("puc-section").style.display = "block";
+  if (category === 'school') {
+    document.getElementById('puc-section').style.display = 'block';
+    updateCourse('PUC');
   }
 
-  // Show Degree submenu
-  if(category === "degree"){
-    document.getElementById("degree-sub").style.display = "flex";
+  if (category === 'degree') {
+    document.getElementById('degree-sub').style.display = 'flex';
+    document.getElementById('bca-section').style.display = 'block';
+    loadBCASingleSubjects();
+    loadBCAAllSubjects();
+    updateCourse('BCA');
+    const first = document.querySelector('#degree-sub .sub-btn');
+    if (first) {
+      document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+      first.classList.add('active');
+    }
   }
 
-  // Show PG submenu
-  if(category === "pg"){
-    document.getElementById("pg-sub").style.display = "flex";
+  if (category === 'pg') {
+    document.getElementById('pg-sub').style.display = 'flex';
+    document.getElementById('mca-section').style.display = 'block';
+    loadMCASingleSubjects();
+    loadMCAAllSubjects();
+    updateCourse('MCA');
+    const first = document.querySelector('#pg-sub .sub-btn');
+    if (first) {
+      document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+      first.classList.add('active');
+    }
   }
 }
 
 function showCourse(course, btn) {
-
-  const sections = [
-    "puc-section",
-    "bca-section",
-    "bba-section",
-    "bcom-section",
-    "bsc-section",
-    "mca-section",
-    "mba-section"
-  ];
-
-  // Hide all sections
-  sections.forEach(id => {
-    const sec = document.getElementById(id);
-    if(sec){
-      sec.style.display = "none";
-    }
+  ['puc','bca','bba','bcom','bsc','mca','mba'].forEach(c => {
+    const el = document.getElementById(c + '-section');
+    if (el) el.style.display = 'none';
   });
+  const section = document.getElementById(course + '-section');
+  if (section) section.style.display = 'block';
+  document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
 
-  // Remove active buttons
-  document.querySelectorAll(".sub-btn").forEach(button => {
-    button.classList.remove("active");
-  });
+  // Load subjects immediately
+  if (course === 'bca') { loadBCASingleSubjects(); loadBCAAllSubjects(); }
+  if (course === 'mca') { loadMCASingleSubjects(); loadMCAAllSubjects(); }
+  if (course === 'bba') { loadBBASingleSubjects(); loadBBAAllSubjects(); }
+  if (course === 'bcom') { loadBComSingleSubjects(); loadBComAllSubjects(); }
+  if (course === 'mba') { loadMBASingleSubjects(); loadMBAAllSubjects(); }
+  if (course === 'bsc') { loadBScSingleSubjects(); loadBScAllSubjects(); }
 
-  btn.classList.add("active");
+  updateCourse(course.toUpperCase());
+}
 
   // Show selected section
   const selected = document.getElementById(course + "-section");
@@ -61,7 +70,8 @@ function showCourse(course, btn) {
     selected.style.display = "block";
   }
 }
-// ── CHARTS ──
+
+ // ── CHARTS ──
 let pucBarChart = null, pucRadarChart = null;
 
 // ── BCA SUBJECTS ──
@@ -121,6 +131,8 @@ function showBCAMode(mode) {
   document.getElementById('bca_all_mode').style.display = mode === 'all' ? 'block' : 'none';
   document.querySelectorAll('#bca-section .mode-btn').forEach(b => b.classList.remove('active'));
   event.target.classList.add('active');
+  if (mode === 'single') loadBCASingleSubjects();
+  if (mode === 'all') loadBCAAllSubjects();
 }
 
 function showMCAMode(mode) {
@@ -128,6 +140,8 @@ function showMCAMode(mode) {
   document.getElementById('mca_all_mode').style.display = mode === 'all' ? 'block' : 'none';
   document.querySelectorAll('#mca-section .mode-btn').forEach(b => b.classList.remove('active'));
   event.target.classList.add('active');
+  if (mode === 'single') loadMCASingleSubjects();
+  if (mode === 'all') loadMCAAllSubjects();
 }
 
 function showBBAMode(mode) {
@@ -135,6 +149,8 @@ function showBBAMode(mode) {
   document.getElementById('bba_all_mode').style.display = mode === 'all' ? 'block' : 'none';
   document.querySelectorAll('#bba-section .mode-btn').forEach(b => b.classList.remove('active'));
   event.target.classList.add('active');
+  if (mode === 'single') loadBBASingleSubjects();
+  if (mode === 'all') loadBBAAllSubjects();
 }
 
 function showBComMode(mode) {
@@ -142,6 +158,8 @@ function showBComMode(mode) {
   document.getElementById('bcom_all_mode').style.display = mode === 'all' ? 'block' : 'none';
   document.querySelectorAll('#bcom-section .mode-btn').forEach(b => b.classList.remove('active'));
   event.target.classList.add('active');
+  if (mode === 'single') loadBComSingleSubjects();
+  if (mode === 'all') loadBComAllSubjects();
 }
 
 function showMBAMode(mode) {
@@ -149,6 +167,8 @@ function showMBAMode(mode) {
   document.getElementById('mba_all_mode').style.display = mode === 'all' ? 'block' : 'none';
   document.querySelectorAll('#mba-section .mode-btn').forEach(b => b.classList.remove('active'));
   event.target.classList.add('active');
+  if (mode === 'single') loadMBASingleSubjects();
+  if (mode === 'all') loadMBAAllSubjects();
 }
 
 function showBScMode(mode) {
@@ -156,6 +176,8 @@ function showBScMode(mode) {
   document.getElementById('bsc_all_mode').style.display = mode === 'all' ? 'block' : 'none';
   document.querySelectorAll('#bsc-section .mode-btn').forEach(b => b.classList.remove('active'));
   event.target.classList.add('active');
+  if (mode === 'single') loadBScSingleSubjects();
+  if (mode === 'all') loadBScAllSubjects();
 }
 
 // ── LOAD SUBJECTS ──
@@ -1054,16 +1076,36 @@ function printAllPDF(course, name, roll, college, sgpa, pct, sems, risk, cards) 
 // ── DOM READY ──
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('puc-section').style.display = 'block';
+
+  // Auto load subjects for semester 1 when page loads
   const bcaSem = document.getElementById('bca_semester');
-  if (bcaSem) bcaSem.addEventListener('change', loadBCASingleSubjects);
+  if (bcaSem) {
+    bcaSem.addEventListener('change', loadBCASingleSubjects);
+    loadBCASingleSubjects();
+  }
   const mcaSem = document.getElementById('mca_semester');
-  if (mcaSem) mcaSem.addEventListener('change', loadMCASingleSubjects);
+  if (mcaSem) {
+    mcaSem.addEventListener('change', loadMCASingleSubjects);
+    loadMCASingleSubjects();
+  }
   const bbaSem = document.getElementById('bba_semester');
-  if (bbaSem) bbaSem.addEventListener('change', loadBBASingleSubjects);
+  if (bbaSem) {
+    bbaSem.addEventListener('change', loadBBASingleSubjects);
+    loadBBASingleSubjects();
+  }
   const bcomSem = document.getElementById('bcom_semester');
-  if (bcomSem) bcomSem.addEventListener('change', loadBComSingleSubjects);
+  if (bcomSem) {
+    bcomSem.addEventListener('change', loadBComSingleSubjects);
+    loadBComSingleSubjects();
+  }
   const mbaSem = document.getElementById('mba_semester');
-  if (mbaSem) mbaSem.addEventListener('change', loadMBASingleSubjects);
+  if (mbaSem) {
+    mbaSem.addEventListener('change', loadMBASingleSubjects);
+    loadMBASingleSubjects();
+  }
   const bscSem = document.getElementById('bsc_semester');
-  if (bscSem) bscSem.addEventListener('change', loadBScSingleSubjects);
+  if (bscSem) {
+    bscSem.addEventListener('change', loadBScSingleSubjects);
+    loadBScSingleSubjects();
+  }
 });
